@@ -1,0 +1,5 @@
+[
+  { "from": "Pune", "to": "Mumbai", "type": "train", "cost": 300, "hours": 3 },
+  { "from": "Pune", "to": "Lonavala", "type": "bus", "cost": 200, "hours": 2 },
+  { "from": "Pune", "to": "Nashik", "type": "bus", "cost": 400, "hours": 5 }
+]

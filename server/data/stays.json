@@ -1,0 +1,5 @@
+[
+  { "city": "Mumbai", "type": "hostel", "cost": 700 },
+  { "city": "Lonavala", "type": "hostel", "cost": 600 },
+  { "city": "Nashik", "type": "budget hotel", "cost": 900 }
+]
