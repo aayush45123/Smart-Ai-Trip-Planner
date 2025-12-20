@@ -1,0 +1,302 @@
+.mapContainer {
+  position: relative;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.mapWrapper {
+  height: 500px;
+  width: 100%;
+  position: relative;
+  background-color: var(--color-bg-secondary);
+}
+
+.mapHeader {
+  position: absolute;
+  top: var(--spacing-md);
+  left: var(--spacing-md);
+  right: var(--spacing-md);
+  z-index: 1000;
+  display: flex;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+.mapBadge {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: rgba(26, 26, 26, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  box-shadow: var(--shadow-md);
+}
+
+.mapBadgeIcon {
+  font-size: var(--font-size-base);
+}
+
+.routeBadge {
+  background: linear-gradient(
+    135deg,
+    var(--color-accent-purple),
+    var(--color-accent-blue)
+  );
+}
+
+.loading {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-xl);
+  background-color: rgba(26, 26, 26, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border-default);
+}
+
+.loadingSpinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--color-border-default);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loadingText {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+.error {
+  padding: var(--spacing-lg);
+  background-color: rgba(255, 82, 82, 0.1);
+  border: 1px solid var(--color-error);
+  border-radius: var(--radius-lg);
+  color: var(--color-error);
+  text-align: center;
+  margin: var(--spacing-xl);
+}
+
+.errorIcon {
+  font-size: var(--font-size-3xl);
+  margin-bottom: var(--spacing-sm);
+}
+
+.errorText {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Custom Leaflet Styling */
+.mapWrapper :global(.leaflet-container) {
+  background-color: var(--color-bg-secondary);
+  font-family: var(--font-family);
+}
+
+.mapWrapper :global(.leaflet-popup-content-wrapper) {
+  background-color: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--color-border-default);
+}
+
+.mapWrapper :global(.leaflet-popup-content) {
+  margin: var(--spacing-md);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.mapWrapper :global(.leaflet-popup-tip) {
+  background-color: var(--color-bg-tertiary);
+  border: 1px solid var(--color-border-default);
+  border-top: none;
+  border-right: none;
+}
+
+.mapWrapper :global(.leaflet-control-zoom) {
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+}
+
+.mapWrapper :global(.leaflet-control-zoom-in),
+.mapWrapper :global(.leaflet-control-zoom-out) {
+  background-color: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+  border: none;
+  border-bottom: 1px solid var(--color-border-default);
+  width: 36px;
+  height: 36px;
+  line-height: 36px;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  transition: all var(--transition-fast);
+}
+
+.mapWrapper :global(.leaflet-control-zoom-in:hover),
+.mapWrapper :global(.leaflet-control-zoom-out:hover) {
+  background-color: var(--color-bg-elevated);
+  color: var(--color-primary);
+}
+
+.mapWrapper :global(.leaflet-control-zoom-out) {
+  border-bottom: none;
+}
+
+.mapWrapper :global(.leaflet-control-attribution) {
+  background-color: rgba(26, 26, 26, 0.8);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+  border-radius: var(--radius-sm);
+  margin: var(--spacing-sm);
+  padding: 2px 6px;
+}
+
+.mapWrapper :global(.leaflet-control-attribution a) {
+  color: var(--color-primary);
+}
+
+/* Custom Marker Styling */
+.customMarker {
+  background-color: var(--color-primary);
+  border: 3px solid var(--color-bg-primary);
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  box-shadow: var(--shadow-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-sm);
+}
+
+.startMarker {
+  background-color: var(--color-accent-cyan);
+}
+
+.endMarker {
+  background-color: var(--color-primary);
+}
+
+.routeInfo {
+  position: absolute;
+  bottom: var(--spacing-md);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  display: flex;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md) var(--spacing-lg);
+  background-color: rgba(26, 26, 26, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  animation: slideUp 0.4s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 20px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+.routeInfoItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: 0 var(--spacing-md);
+  border-right: 1px solid var(--color-border-default);
+}
+
+.routeInfoItem:last-child {
+  border-right: none;
+}
+
+.routeInfoLabel {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.routeInfoValue {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary);
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .mapWrapper {
+    height: 400px;
+  }
+
+  .mapHeader {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+
+  .routeInfo {
+    left: var(--spacing-md);
+    right: var(--spacing-md);
+    transform: none;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+
+  .routeInfoItem {
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+    padding: var(--spacing-sm) 0;
+    border-right: none;
+    border-bottom: 1px solid var(--color-border-default);
+  }
+
+  .routeInfoItem:last-child {
+    border-bottom: none;
+  }
+}

@@ -4,6 +4,7 @@ import Signup from "./pages/Auth/SignUp/SignUp";
 import Planner from "./pages/Planner/Planner";
 import TripResult from "./pages/TripResult/TripResult";
 import ProtectedRoute from "./components/ProtectedRoute";
+import "./App.css";
 
 export default function App() {
   return (
