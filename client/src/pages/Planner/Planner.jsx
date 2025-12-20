@@ -5,6 +5,7 @@ import styles from "./Planner.module.css";
 
 export default function Planner() {
   const [startCity, setStartCity] = useState("Pune");
+  const [destinationCity, setDestinationCity] = useState("");
   const [budget, setBudget] = useState(5000);
   const [days, setDays] = useState(2);
   const [loading, setLoading] = useState(false);
@@ -13,18 +14,27 @@ export default function Planner() {
   const navigate = useNavigate();
 
   async function generateTrip() {
+    if (!destinationCity.trim()) {
+      setError("Please enter a destination city");
+      return;
+    }
+
     setError("");
     setLoading(true);
 
     try {
       const res = await api.post("/trips/generate", {
         startCity,
+        destinationCity,
         budget,
         days,
       });
 
-      localStorage.setItem("trips", JSON.stringify(res.data.trips));
-      navigate("/result");
+      navigate("/result", {
+        state: {
+          trips: res.data.trips,
+        },
+      });
     } catch (err) {
       setError(
         err.response?.data?.message ||
@@ -41,7 +51,7 @@ export default function Planner() {
         <div className={styles.header}>
           <h2 className={styles.title}>Plan Your Perfect Trip</h2>
           <p className={styles.subtitle}>
-            Tell us your preferences and we'll create a customized itinerary
+            Choose start & destination cities to generate real routes
           </p>
         </div>
 
@@ -49,12 +59,9 @@ export default function Planner() {
           {error && <div className={styles.error}>{error}</div>}
 
           <form className={styles.form} onSubmit={(e) => e.preventDefault()}>
-            {/* Starting City Selection */}
+            {/* START CITY */}
             <div className={styles.formGroup}>
-              <label className={styles.label}>
-                <span className={styles.labelIcon}>📍</span>
-                Starting City
-              </label>
+              <label className={styles.label}>📍 Starting City</label>
               <select
                 className={styles.select}
                 value={startCity}
@@ -63,55 +70,46 @@ export default function Planner() {
               >
                 <option value="Pune">Pune</option>
                 <option value="Mumbai">Mumbai</option>
-                <option value="Nashik">Nashik</option>
                 <option value="Delhi">Delhi</option>
                 <option value="Bangalore">Bangalore</option>
                 <option value="Hyderabad">Hyderabad</option>
+                <option value="Chennai">Chennai</option>
               </select>
             </div>
 
-            {/* Budget Slider */}
+            {/* DESTINATION CITY */}
             <div className={styles.formGroup}>
-              <div className={styles.rangeGroup}>
-                <div className={styles.rangeHeader}>
-                  <label className={styles.label}>
-                    <span className={styles.labelIcon}>💰</span>
-                    Budget
-                  </label>
-                  <span className={styles.budgetValue}>
-                    ₹{budget.toLocaleString()}
-                  </span>
-                </div>
-
-                <div className={styles.rangeWrapper}>
-                  <input
-                    type="range"
-                    className={styles.range}
-                    min="2000"
-                    max="50000"
-                    step="500"
-                    value={budget}
-                    onChange={(e) => setBudget(Number(e.target.value))}
-                    disabled={loading}
-                  />
-                  <div className={styles.rangeLabels}>
-                    <span>₹2,000</span>
-                    <span>₹50,000</span>
-                  </div>
-                </div>
-              </div>
+              <label className={styles.label}>🏁 Destination City</label>
+              <input
+                type="text"
+                className={styles.input}
+                placeholder="Enter destination city"
+                value={destinationCity}
+                onChange={(e) => setDestinationCity(e.target.value)}
+                disabled={loading}
+              />
             </div>
 
-            {/* Number of Days */}
+            {/* BUDGET */}
             <div className={styles.formGroup}>
-              <label className={styles.label} htmlFor="days">
-                <span className={styles.labelIcon}>📅</span>
-                Number of Days
-              </label>
+              <label className={styles.label}>💰 Budget</label>
               <input
-                id="days"
+                type="range"
+                min="2000"
+                max="50000"
+                step="500"
+                value={budget}
+                onChange={(e) => setBudget(Number(e.target.value))}
+                disabled={loading}
+              />
+              <div>₹{budget.toLocaleString()}</div>
+            </div>
+
+            {/* DAYS */}
+            <div className={styles.formGroup}>
+              <label className={styles.label}>📅 Number of Days</label>
+              <input
                 type="number"
-                className={styles.input}
                 min="1"
                 max="30"
                 value={days}
@@ -120,56 +118,30 @@ export default function Planner() {
               />
             </div>
 
-            {/* Trip Summary */}
+            {/* SUMMARY */}
             <div className={styles.summary}>
-              <h3 className={styles.summaryTitle}>Trip Summary</h3>
-              <div className={styles.summaryGrid}>
-                <div className={styles.summaryItem}>
-                  <span className={styles.summaryLabel}>From</span>
-                  <span className={styles.summaryValue}>{startCity}</span>
-                </div>
-                <div className={styles.summaryItem}>
-                  <span className={styles.summaryLabel}>Duration</span>
-                  <span className={styles.summaryValue}>
-                    {days} {days === 1 ? "Day" : "Days"}
-                  </span>
-                </div>
-                <div className={styles.summaryItem}>
-                  <span className={styles.summaryLabel}>Budget</span>
-                  <span className={styles.summaryValue}>
-                    ₹{budget.toLocaleString()}
-                  </span>
-                </div>
-                <div className={styles.summaryItem}>
-                  <span className={styles.summaryLabel}>Per Day</span>
-                  <span className={styles.summaryValue}>
-                    ₹{Math.round(budget / days).toLocaleString()}
-                  </span>
-                </div>
-              </div>
+              <p>
+                <strong>From:</strong> {startCity}
+              </p>
+              <p>
+                <strong>To:</strong> {destinationCity || "—"}
+              </p>
+              <p>
+                <strong>Days:</strong> {days}
+              </p>
+              <p>
+                <strong>Budget:</strong> ₹{budget.toLocaleString()}
+              </p>
             </div>
 
-            {/* Generate Button */}
-            <div className={styles.buttonGroup}>
-              <button
-                type="button"
-                className={styles.generateButton}
-                onClick={generateTrip}
-                disabled={loading || days < 1}
-              >
-                {loading ? (
-                  <>
-                    <span>⏳</span>
-                    Generating Your Trip...
-                  </>
-                ) : (
-                  <>
-                    <span>✨</span>
-                    Generate Trip Plan
-                  </>
-                )}
-              </button>
-            </div>
+            {/* BUTTON */}
+            <button
+              className={styles.generateButton}
+              onClick={generateTrip}
+              disabled={loading}
+            >
+              {loading ? "⏳ Generating..." : "✨ Generate Trip"}
+            </button>
           </form>
         </div>
       </div>

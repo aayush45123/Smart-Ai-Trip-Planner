@@ -1,42 +1,33 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import MapView from "../../components/MapView/MapView";
 import styles from "./TripResult.module.css";
 
 export default function TripResult() {
   const navigate = useNavigate();
+  const location = useLocation();
+
   const [trips, setTrips] = useState([]);
   const [selected, setSelected] = useState(null);
+  const [selectedRoute, setSelectedRoute] = useState(null);
 
   useEffect(() => {
-    const storedTrips = localStorage.getItem("trips");
-
-    if (!storedTrips) {
+    if (!location.state || !location.state.trips) {
       navigate("/planner");
       return;
     }
 
-    try {
-      const parsedTrips = JSON.parse(storedTrips);
-      if (parsedTrips && parsedTrips.length > 0) {
-        setTrips(parsedTrips);
-        setSelected(parsedTrips[0]);
-      } else {
-        navigate("/planner");
-      }
-    } catch (error) {
-      console.error("Error parsing trips:", error);
-      navigate("/planner");
-    }
-  }, [navigate]);
+    const incomingTrips = location.state.trips;
+
+    setTrips(incomingTrips);
+    setSelected(incomingTrips[0]);
+    setSelectedRoute(incomingTrips[0].routes[0]);
+  }, [location.state, navigate]);
 
   if (!selected) {
     return (
       <div className={styles.container}>
-        <div className={styles.emptyState}>
-          <div className={styles.emptyIcon}>🗺️</div>
-          <div className={styles.emptyText}>Loading your trips...</div>
-        </div>
+        <div className={styles.emptyState}>Loading trips…</div>
       </div>
     );
   }
@@ -47,21 +38,15 @@ export default function TripResult() {
         <div className={styles.header}>
           <h2 className={styles.title}>Your Trip Options</h2>
           <p className={styles.subtitle}>
-            Choose your perfect destination from our curated recommendations
+            Choose the best route for your journey
           </p>
         </div>
 
         <div className={styles.content}>
-          {/* Sidebar with Trip Cards */}
+          {/* Sidebar */}
           <aside className={styles.sidebar}>
             <div className={styles.sidebarHeader}>
-              <h3 className={styles.sidebarTitle}>
-                {trips.length} {trips.length === 1 ? "Option" : "Options"}{" "}
-                Available
-              </h3>
-              <p className={styles.sidebarSubtitle}>
-                Select a destination to view details
-              </p>
+              <h3>{trips.length} Option Available</h3>
             </div>
 
             <div className={styles.tripList}>
@@ -73,115 +58,56 @@ export default function TripResult() {
                       ? styles.tripCardActive
                       : ""
                   }`}
-                  onClick={() => setSelected(trip)}
+                  onClick={() => {
+                    setSelected(trip);
+                    setSelectedRoute(trip.routes[0]);
+                  }}
                 >
-                  <div className={styles.tripCardHeader}>
-                    <div className={styles.tripDestination}>
-                      <span className={styles.tripIcon}>🏖️</span>
-                      <h4 className={styles.tripName}>{trip.destination}</h4>
-                    </div>
-                    {selected.destination === trip.destination && (
-                      <span
-                        className={`${styles.tripBadge} ${styles.tripBadgeActive}`}
-                      >
-                        Selected
-                      </span>
-                    )}
-                  </div>
+                  <h4>{trip.destination}</h4>
 
-                  <div className={styles.tripCost}>
-                    ₹{trip.totalCost?.toLocaleString()}
-                  </div>
-
+                  {/* USE ROUTE DATA */}
                   <div className={styles.tripDetails}>
-                    {trip.duration && (
-                      <div className={styles.tripDetail}>
-                        <span className={styles.tripDetailIcon}>📅</span>
-                        <span className={styles.tripDetailLabel}>Duration</span>
-                        <span className={styles.tripDetailValue}>
-                          {trip.duration}
-                        </span>
-                      </div>
-                    )}
-                    {trip.category && (
-                      <div className={styles.tripDetail}>
-                        <span className={styles.tripDetailIcon}>🏷️</span>
-                        <span className={styles.tripDetailLabel}>Category</span>
-                        <span className={styles.tripDetailValue}>
-                          {trip.category}
-                        </span>
-                      </div>
-                    )}
-                    {trip.rating && (
-                      <div className={styles.tripDetail}>
-                        <span className={styles.tripDetailIcon}>⭐</span>
-                        <span className={styles.tripDetailLabel}>Rating</span>
-                        <span className={styles.tripDetailValue}>
-                          {trip.rating}/5
-                        </span>
-                      </div>
-                    )}
+                    <div>📏 {trip.routes[0].distanceKm} km</div>
+                    <div>⏱️ {trip.routes[0].durationHours} hrs</div>
+                    <div>💰 ₹{trip.routes[0].totalCost}</div>
                   </div>
                 </div>
               ))}
             </div>
           </aside>
 
-          {/* Main Content Area */}
+          {/* Main */}
           <main className={styles.mainContent}>
-            {/* Map Section */}
-            <section className={styles.mapSection}>
-              <div className={styles.sectionHeader}>
-                <span className={styles.sectionIcon}>🗺️</span>
-                <h3 className={styles.sectionTitle}>Route Overview</h3>
+            {/* Route Selection */}
+            <section className={styles.routeSelection}>
+              <h3>Available Routes</h3>
+
+              <div className={styles.routeList}>
+                {selected.routes.map((route, idx) => (
+                  <div
+                    key={idx}
+                    className={`${styles.routeCard} ${
+                      selectedRoute === route ? styles.routeCardActive : ""
+                    }`}
+                    onClick={() => setSelectedRoute(route)}
+                  >
+                    <h4>{route.type}</h4>
+                    <p>{route.distanceKm} km</p>
+                    <p>{route.durationHours} hrs</p>
+                    <p>₹{route.totalCost}</p>
+                  </div>
+                ))}
               </div>
-              <MapView
-                startCity={selected.startCity || "Pune"}
-                destination={selected.destination}
-              />
             </section>
 
-            {/* Itinerary Section */}
-            {selected.itinerary && selected.itinerary.length > 0 && (
-              <section className={styles.itinerarySection}>
-                <div className={styles.sectionHeader}>
-                  <span className={styles.sectionIcon}>📋</span>
-                  <h3 className={styles.sectionTitle}>Day-by-Day Itinerary</h3>
-                </div>
-
-                <div className={styles.itineraryGrid}>
-                  {selected.itinerary.map((day, index) => (
-                    <div key={index} className={styles.dayCard}>
-                      <div className={styles.dayHeader}>
-                        <div className={styles.dayNumber}>{index + 1}</div>
-                        <h4 className={styles.dayTitle}>
-                          {day.title || `Day ${index + 1}`}
-                        </h4>
-                      </div>
-                      <div className={styles.activities}>
-                        {day.activities ? (
-                          Array.isArray(day.activities) ? (
-                            day.activities.map((activity, actIndex) => (
-                              <div key={actIndex} className={styles.activity}>
-                                • {activity}
-                              </div>
-                            ))
-                          ) : (
-                            <div className={styles.activity}>
-                              • {day.activities}
-                            </div>
-                          )
-                        ) : (
-                          <div className={styles.activity}>
-                            • Explore {selected.destination}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            )}
+            {/* Map */}
+            <section className={styles.mapSection}>
+              <MapView
+                startCity={selected.startCity}
+                destination={selected.destination}
+                selectedRoute={selectedRoute}
+              />
+            </section>
           </main>
         </div>
       </div>
