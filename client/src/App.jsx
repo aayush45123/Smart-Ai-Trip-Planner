@@ -1,8 +1,8 @@
 import { Routes, Route } from "react-router-dom";
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
-import Planner from "./pages/Planner";
-import TripResult from "./pages/TripResult";
+import Login from "./pages/Auth/Login/Login";
+import Signup from "./pages/Auth/SignUp/SignUp";
+import Planner from "./pages/Planner/Planner";
+import TripResult from "./pages/TripResult/TripResult";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 export default function App() {
