@@ -1,24 +1,52 @@
 .container {
   min-height: 100vh;
-  background-color: var(--color-bg-primary);
+  background: linear-gradient(135deg, var(--color-bg-primary) 0%, #0d1128 100%);
   padding: var(--spacing-xl) var(--spacing-md);
+  position: relative;
+  overflow-x: hidden;
+}
+
+.container::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 300px;
+  background: radial-gradient(
+    ellipse at top,
+    rgba(99, 102, 241, 0.15) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
 }
 
 .wrapper {
   max-width: 1400px;
   margin: 0 auto;
+  position: relative;
+  z-index: 1;
 }
 
 .header {
   margin-bottom: var(--spacing-2xl);
-  animation: fadeInDown 0.6s ease-out;
+  animation: fadeInDown 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  text-align: center;
 }
 
 .title {
   font-size: var(--font-size-4xl);
   font-weight: var(--font-weight-bold);
-  color: var(--color-text-primary);
+  background: linear-gradient(
+    135deg,
+    var(--color-text-primary) 0%,
+    var(--color-accent-cyan) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   margin-bottom: var(--spacing-sm);
+  letter-spacing: -0.02em;
 }
 
 .subtitle {
@@ -31,7 +59,7 @@
   display: grid;
   grid-template-columns: 400px 1fr;
   gap: var(--spacing-xl);
-  animation: fadeInUp 0.6s ease-out 0.2s both;
+  animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
 }
 
 .sidebar {
@@ -45,9 +73,31 @@
 
 .sidebarHeader {
   padding: var(--spacing-lg);
-  background-color: var(--color-bg-tertiary);
+  background: linear-gradient(
+    135deg,
+    var(--color-bg-tertiary) 0%,
+    rgba(26, 31, 58, 0.8) 100%
+  );
   border-radius: var(--radius-lg);
   border: 1px solid var(--color-border-default);
+  backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
+}
+
+.sidebarHeader::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--color-primary),
+    transparent
+  );
 }
 
 .sidebarTitle {
@@ -70,13 +120,18 @@
 
 .tripCard {
   padding: var(--spacing-lg);
-  background-color: var(--color-bg-tertiary);
+  background: linear-gradient(
+    135deg,
+    var(--color-bg-tertiary) 0%,
+    rgba(20, 25, 55, 0.9) 100%
+  );
   border: 2px solid var(--color-border-default);
   border-radius: var(--radius-lg);
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: all var(--transition-medium);
   position: relative;
   overflow: hidden;
+  backdrop-filter: blur(10px);
 }
 
 .tripCard::before {
@@ -86,28 +141,67 @@
   left: 0;
   width: 4px;
   height: 100%;
-  background-color: transparent;
-  transition: all var(--transition-fast);
+  background: linear-gradient(
+    180deg,
+    var(--color-primary),
+    var(--color-accent-cyan)
+  );
+  opacity: 0;
+  transition: opacity var(--transition-medium);
+}
+
+.tripCard::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: radial-gradient(
+    circle,
+    rgba(99, 102, 241, 0.1) 0%,
+    transparent 70%
+  );
+  transform: translate(-50%, -50%);
+  transition: width 0.6s ease, height 0.6s ease;
+  border-radius: 50%;
+  pointer-events: none;
 }
 
 .tripCard:hover {
-  border-color: var(--color-border-strong);
-  background-color: var(--color-bg-elevated);
-  transform: translateX(4px);
+  border-color: var(--color-primary);
+  background: linear-gradient(
+    135deg,
+    var(--color-bg-elevated) 0%,
+    rgba(34, 41, 73, 0.95) 100%
+  );
+  transform: translateX(8px) translateY(-2px);
+  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.2),
+    0 0 0 1px rgba(99, 102, 241, 0.1);
 }
 
 .tripCard:hover::before {
-  background-color: var(--color-primary);
+  opacity: 1;
+}
+
+.tripCard:hover::after {
+  width: 400px;
+  height: 400px;
 }
 
 .tripCardActive {
   border-color: var(--color-primary);
-  background-color: var(--color-bg-elevated);
-  box-shadow: 0 0 0 1px var(--color-primary);
+  background: linear-gradient(
+    135deg,
+    var(--color-bg-elevated) 0%,
+    rgba(34, 41, 73, 0.95) 100%
+  );
+  box-shadow: 0 8px 32px rgba(99, 102, 241, 0.3), 0 0 0 1px var(--color-primary);
+  transform: scale(1.02);
 }
 
 .tripCardActive::before {
-  background-color: var(--color-primary);
+  opacity: 1;
 }
 
 .tripCardHeader {
@@ -125,6 +219,8 @@
 
 .tripIcon {
   font-size: var(--font-size-2xl);
+  filter: drop-shadow(0 0 8px rgba(99, 102, 241, 0.5));
+  animation: float 3s ease-in-out infinite;
 }
 
 .tripName {
@@ -132,6 +228,7 @@
   font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
   margin: 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .tripBadge {
@@ -144,6 +241,7 @@
   color: var(--color-text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  transition: all var(--transition-fast);
 }
 
 .tripBadgeActive {
@@ -154,13 +252,23 @@
   );
   color: var(--color-bg-primary);
   border-color: transparent;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+  animation: pulse 2s ease-in-out infinite;
 }
 
 .tripCost {
   font-size: var(--font-size-3xl);
   font-weight: var(--font-weight-bold);
-  color: var(--color-primary);
+  background: linear-gradient(
+    135deg,
+    var(--color-primary),
+    var(--color-accent-cyan)
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   margin-bottom: var(--spacing-sm);
+  text-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
 }
 
 .tripDetails {
@@ -177,10 +285,16 @@
   gap: var(--spacing-sm);
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
+  transition: transform var(--transition-fast);
+}
+
+.tripCard:hover .tripDetail {
+  transform: translateX(4px);
 }
 
 .tripDetailIcon {
   font-size: var(--font-size-base);
+  color: var(--color-primary);
 }
 
 .tripDetailLabel {
@@ -200,10 +314,39 @@
 }
 
 .mapSection {
-  background-color: var(--color-bg-tertiary);
+  background: linear-gradient(
+    135deg,
+    var(--color-bg-tertiary) 0%,
+    rgba(26, 31, 58, 0.8) 100%
+  );
   border-radius: var(--radius-xl);
   padding: var(--spacing-lg);
   border: 1px solid var(--color-border-default);
+  backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
+  transition: all var(--transition-medium);
+}
+
+.mapSection::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(
+    circle,
+    rgba(99, 102, 241, 0.05) 0%,
+    transparent 70%
+  );
+  animation: rotate 20s linear infinite;
+}
+
+.mapSection:hover {
+  border-color: var(--color-primary);
+  box-shadow: 0 8px 32px rgba(99, 102, 241, 0.15);
+  transform: translateY(-2px);
 }
 
 .sectionHeader {
@@ -211,10 +354,21 @@
   align-items: center;
   gap: var(--spacing-sm);
   margin-bottom: var(--spacing-lg);
+  position: relative;
+  z-index: 1;
 }
 
 .sectionIcon {
   font-size: var(--font-size-2xl);
+  background: linear-gradient(
+    135deg,
+    var(--color-primary),
+    var(--color-accent-cyan)
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 8px rgba(99, 102, 241, 0.3));
 }
 
 .sectionTitle {
@@ -224,22 +378,103 @@
 }
 
 .itinerarySection {
-  background-color: var(--color-bg-tertiary);
+  background: linear-gradient(
+    135deg,
+    var(--color-bg-tertiary) 0%,
+    rgba(26, 31, 58, 0.8) 100%
+  );
   border-radius: var(--radius-xl);
   padding: var(--spacing-xl);
   border: 1px solid var(--color-border-default);
+  backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
+}
+
+.itinerarySection::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  background: linear-gradient(
+    180deg,
+    rgba(99, 102, 241, 0.03) 0%,
+    transparent 100%
+  );
+  pointer-events: none;
 }
 
 .itineraryGrid {
   display: grid;
   gap: var(--spacing-lg);
+  position: relative;
+  z-index: 1;
 }
 
 .dayCard {
   padding: var(--spacing-lg);
-  background-color: var(--color-bg-secondary);
+  background: linear-gradient(
+    135deg,
+    var(--color-bg-secondary) 0%,
+    rgba(20, 25, 55, 0.6) 100%
+  );
   border-radius: var(--radius-lg);
   border: 1px solid var(--color-border-default);
+  transition: all var(--transition-medium);
+  position: relative;
+  overflow: hidden;
+  animation: slideInLeft 0.6s ease-out both;
+}
+
+.dayCard:nth-child(1) {
+  animation-delay: 0.1s;
+}
+.dayCard:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.dayCard:nth-child(3) {
+  animation-delay: 0.3s;
+}
+.dayCard:nth-child(4) {
+  animation-delay: 0.4s;
+}
+.dayCard:nth-child(5) {
+  animation-delay: 0.5s;
+}
+
+.dayCard::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--color-accent-purple),
+    var(--color-accent-blue),
+    transparent
+  );
+  opacity: 0;
+  transition: opacity var(--transition-medium);
+}
+
+.dayCard:hover {
+  border-color: var(--color-accent-blue);
+  background: linear-gradient(
+    135deg,
+    var(--color-bg-elevated) 0%,
+    rgba(34, 41, 73, 0.8) 100%
+  );
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.2);
+}
+
+.dayCard:hover::before {
+  opacity: 1;
 }
 
 .dayHeader {
@@ -255,8 +490,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 48px;
+  height: 48px;
   background: linear-gradient(
     135deg,
     var(--color-accent-purple),
@@ -266,6 +501,26 @@
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
+  box-shadow: 0 4px 16px rgba(139, 92, 246, 0.4),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.dayNumber::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    45deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  animation: shimmer 3s ease-in-out infinite;
 }
 
 .dayTitle {
@@ -284,6 +539,24 @@
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
   line-height: 1.6;
+  padding-left: var(--spacing-md);
+  position: relative;
+  transition: all var(--transition-fast);
+}
+
+.activity::before {
+  content: "→";
+  position: absolute;
+  left: 0;
+  color: var(--color-primary);
+  font-weight: var(--font-weight-bold);
+  opacity: 0.6;
+  transition: all var(--transition-fast);
+}
+
+.dayCard:hover .activity::before {
+  opacity: 1;
+  transform: translateX(4px);
 }
 
 .emptyState {
@@ -294,17 +567,20 @@
   padding: var(--spacing-2xl);
   text-align: center;
   color: var(--color-text-secondary);
+  animation: fadeIn 0.8s ease-out;
 }
 
 .emptyIcon {
   font-size: 4rem;
   margin-bottom: var(--spacing-lg);
-  opacity: 0.5;
+  opacity: 0.3;
+  animation: float 3s ease-in-out infinite;
 }
 
 .emptyText {
   font-size: var(--font-size-lg);
   margin-bottom: var(--spacing-sm);
+  color: var(--color-text-primary);
 }
 
 .emptySubtext {
@@ -312,10 +588,11 @@
   color: var(--color-text-tertiary);
 }
 
+/* Keyframe Animations */
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(30px);
+    transform: translateY(40px);
   }
   to {
     opacity: 1;
@@ -326,11 +603,71 @@
 @keyframes fadeInDown {
   from {
     opacity: 0;
-    transform: translateY(-20px);
+    transform: translateY(-30px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%) translateY(-100%) rotate(45deg);
+  }
+  100% {
+    transform: translateX(100%) translateY(100%) rotate(45deg);
   }
 }
 
@@ -359,10 +696,16 @@
     flex-direction: row;
     overflow-x: auto;
     padding-bottom: var(--spacing-sm);
+    scroll-snap-type: x mandatory;
   }
 
   .tripCard {
-    min-width: 280px;
+    min-width: 300px;
+    scroll-snap-align: start;
+  }
+
+  .tripCard:hover {
+    transform: translateY(-4px);
   }
 }
 
@@ -375,8 +718,22 @@
     font-size: var(--font-size-3xl);
   }
 
+  .subtitle {
+    font-size: var(--font-size-base);
+  }
+
   .mapSection,
   .itinerarySection {
     padding: var(--spacing-md);
+  }
+
+  .dayNumber {
+    width: 40px;
+    height: 40px;
+    font-size: var(--font-size-base);
+  }
+
+  .sectionIcon {
+    font-size: var(--font-size-xl);
   }
 }
