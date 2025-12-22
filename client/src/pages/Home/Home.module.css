@@ -716,12 +716,15 @@
 
 .destCard {
   position: relative;
-  padding: 2.5rem;
+  padding: 0;
   background: var(--color-bg-secondary);
   border: 2px solid var(--color-border-strong);
   cursor: pointer;
   transition: all 0.4s;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 450px;
 }
 
 .dest1,
@@ -733,19 +736,16 @@
     calc(100% - 40px) 100%,
     0 100%
   );
-  min-height: 350px;
 }
 
 .dest2,
 .dest5 {
   clip-path: polygon(40px 0, 100% 0, 100% 100%, 0 100%, 0 40px);
-  min-height: 360px;
 }
 
 .dest3,
 .dest6 {
   clip-path: polygon(0 0, calc(100% - 40px) 0, 100% 40px, 100% 100%, 0 100%);
-  min-height: 355px;
 }
 
 .destCard:hover {
@@ -762,24 +762,36 @@
   height: 30px;
   border-right: 3px solid var(--color-primary);
   border-top: 3px solid var(--color-primary);
+  z-index: 3;
 }
 
-.destEmoji {
-  font-size: 5rem;
-  text-align: center;
-  margin-bottom: 1.5rem;
-  opacity: 0.3;
-  transition: all 0.3s;
+.destImage {
+  width: 100%;
+  height: 250px;
+  overflow: hidden;
+  position: relative;
 }
 
-.destCard:hover .destEmoji {
-  transform: scale(1.2);
-  opacity: 0.5;
+.destImage img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.destCard:hover .destImage img {
+  transform: scale(1.1);
 }
 
 .destInfo {
   position: relative;
   z-index: 2;
+  padding: 2rem 2.5rem;
+  background: var(--color-bg-secondary);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .destCat {
@@ -792,6 +804,7 @@
   color: var(--color-primary);
   margin-bottom: 1rem;
   text-transform: uppercase;
+  width: fit-content;
 }
 
 .destName {

@@ -22,6 +22,12 @@ import {
   Mountain,
 } from "lucide-react";
 import Navbar from "../../components/Navbar/Navbar";
+import delhi from "../../assets/delhi.jpeg";
+import mumbai from "../../assets/mumbai.jpg";
+import kashmir from "../../assets/kashmir.jpeg";
+import kashi from "../../assets/kashi.jpeg";
+import kolkata from "../../assets/kolkatta.jpeg";
+import punjab from "../../assets/punjab.jpeg";
 import styles from "./Home.module.css";
 
 const Home = () => {
@@ -81,52 +87,52 @@ const Home = () => {
 
   const destinations = [
     {
-      name: "PARIS",
-      country: "FRANCE",
-      image: "🗼",
-      rating: 4.9,
-      trips: "12.5K",
+      name: "DELHI",
+      country: "INDIA",
+      image: delhi,
+      rating: 4.7,
+      trips: "18.2K",
       cat: "CULTURAL",
     },
     {
-      name: "TOKYO",
-      country: "JAPAN",
-      image: "🗾",
-      rating: 4.8,
-      trips: "10.2K",
-      cat: "URBAN",
-    },
-    {
-      name: "BALI",
-      country: "INDONESIA",
-      image: "🏝️",
-      rating: 4.7,
-      trips: "8.9K",
-      cat: "BEACH",
-    },
-    {
-      name: "NEW YORK",
-      country: "USA",
-      image: "🗽",
-      rating: 4.8,
-      trips: "15.3K",
+      name: "MUMBAI",
+      country: "INDIA",
+      image: mumbai,
+      rating: 4.6,
+      trips: "16.5K",
       cat: "METRO",
     },
     {
-      name: "ROME",
-      country: "ITALY",
-      image: "🏛️",
+      name: "KASHMIR",
+      country: "INDIA",
+      image: kashmir,
       rating: 4.9,
-      trips: "11.7K",
-      cat: "HISTORY",
+      trips: "12.3K",
+      cat: "MOUNTAIN",
     },
     {
-      name: "DUBAI",
-      country: "UAE",
-      image: "🕌",
-      rating: 4.6,
-      trips: "9.4K",
-      cat: "LUXURY",
+      name: "KASHI",
+      country: "INDIA",
+      image: kashi,
+      rating: 4.8,
+      trips: "14.7K",
+      cat: "SPIRITUAL",
+    },
+    {
+      name: "KOLKATA",
+      country: "INDIA",
+      image: kolkata,
+      rating: 4.7,
+      trips: "11.9K",
+      cat: "HERITAGE",
+    },
+    {
+      name: "PUNJAB",
+      country: "INDIA",
+      image: punjab,
+      rating: 4.8,
+      trips: "10.4K",
+      cat: "VIBRANT",
     },
   ];
 
@@ -365,7 +371,9 @@ const Home = () => {
                 onClick={handlePlanTrip}
               >
                 <div className={styles.destCorner}></div>
-                <div className={styles.destEmoji}>{dest.image}</div>
+                <div className={styles.destImage}>
+                  <img src={dest.image} alt={dest.name} />
+                </div>
                 <div className={styles.destInfo}>
                   <div className={styles.destCat}>{dest.cat}</div>
                   <h3 className={styles.destName}>{dest.name}</h3>
