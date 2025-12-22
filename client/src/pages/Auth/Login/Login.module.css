@@ -187,3 +187,70 @@
     font-size: var(--font-size-2xl);
   }
 }
+/* ===== BACK BUTTON STYLES (Add to both Login.module.css and Signup.module.css) ===== */
+
+.backBtn {
+  position: fixed;
+  top: 2rem;
+  left: 2rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  background: var(--glass-backdrop);
+  border: 1px solid var(--color-border-strong);
+  border-radius: 0.75rem;
+  color: var(--color-text-primary);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 100;
+}
+
+.backBtn:hover {
+  transform: translateX(-4px);
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: var(--shadow-md);
+  background: var(--color-card-blue);
+  color: var(--color-primary);
+}
+
+.backBtn svg {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.backBtn:hover svg {
+  transform: translateX(-4px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .backBtn {
+    top: 1rem;
+    left: 1rem;
+    padding: 0.625rem 1rem;
+    font-size: 0.875rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .backBtn {
+    padding: 0.5rem 0.875rem;
+    font-size: 0.8125rem;
+  }
+  
+  .backBtn span {
+    display: none;
+  }
+  
+  .backBtn {
+    width: 2.75rem;
+    height: 2.75rem;
+    justify-content: center;
+    padding: 0;
+  }
+}

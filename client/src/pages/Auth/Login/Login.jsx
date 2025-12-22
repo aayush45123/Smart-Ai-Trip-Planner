@@ -1,6 +1,7 @@
 import { useState } from "react";
 import api from "../../../services/api";
 import { useNavigate, Link } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import styles from "./Login.module.css";
 
 export default function Login() {
@@ -22,7 +23,7 @@ export default function Login() {
       });
 
       localStorage.setItem("token", res.data.token);
-      navigate("/planner");
+      navigate("/"); // Redirect to home page after successful login
     } catch (err) {
       setError(err.response?.data?.message || "Invalid credentials");
     } finally {
@@ -32,6 +33,15 @@ export default function Login() {
 
   return (
     <div className={styles.container}>
+      <button
+        className={styles.backBtn}
+        onClick={() => navigate("/")}
+        aria-label="Go back to home"
+      >
+        <ArrowLeft size={20} />
+        Back to Home
+      </button>
+
       <div className={styles.card}>
         <div className={styles.header}>
           <h2 className={styles.title}>Welcome Back</h2>

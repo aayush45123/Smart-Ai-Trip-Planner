@@ -4,14 +4,18 @@ import Signup from "./pages/Auth/SignUp/SignUp";
 import Planner from "./pages/Planner/Planner";
 import TripResult from "./pages/TripResult/TripResult";
 import ProtectedRoute from "./components/ProtectedRoute";
+import Home from "./pages/Home/Home";
 import "./App.css";
 
 export default function App() {
   return (
     <Routes>
+      {/* Public Routes */}
+      <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
 
+      {/* Protected Routes */}
       <Route
         path="/planner"
         element={
@@ -30,7 +34,8 @@ export default function App() {
         }
       />
 
-      <Route path="*" element={<Login />} />
+      {/* Fallback */}
+      <Route path="*" element={<Home />} />
     </Routes>
   );
 }

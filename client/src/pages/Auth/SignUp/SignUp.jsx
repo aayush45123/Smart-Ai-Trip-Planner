@@ -1,6 +1,7 @@
 import { useState } from "react";
 import api from "../../../services/api";
 import { useNavigate, Link } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import styles from "./Signup.module.css";
 
 export default function Signup() {
@@ -31,7 +32,7 @@ export default function Signup() {
       });
 
       localStorage.setItem("token", res.data.token);
-      navigate("/planner");
+      navigate("/"); // Redirect to home page after successful signup
     } catch (err) {
       setError(
         err.response?.data?.message || "Signup failed. Please try again."
@@ -43,6 +44,15 @@ export default function Signup() {
 
   return (
     <div className={styles.container}>
+      <button
+        className={styles.backBtn}
+        onClick={() => navigate("/")}
+        aria-label="Go back to home"
+      >
+        <ArrowLeft size={20} />
+        Back to Home
+      </button>
+
       <div className={styles.card}>
         <div className={styles.header}>
           <h2 className={styles.title}>Create Account</h2>
