@@ -192,7 +192,6 @@
   outline: none;
   border: none;
   cursor: pointer;
-  -webkit-appearance: none;
 }
 
 .formGroup input[type="range"]::-webkit-slider-thumb {

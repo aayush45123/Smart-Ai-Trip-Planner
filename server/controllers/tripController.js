@@ -23,8 +23,8 @@ export const generateTrips = async (req, res) => {
       });
     }
 
-    // Save trip preferences
-    const trip = await Trip.create({
+    // Save preferences
+    await Trip.create({
       userId: req.user._id,
       startCity,
       destinationCity,
@@ -57,8 +57,29 @@ export const generateTrips = async (req, res) => {
       });
     }
 
+    // Practical warning
+    if (routes[0].distanceKm > 3000) {
+      return res.json({
+        warning: "Road travel for this destination may not be practical.",
+        trips: [
+          {
+            startCity,
+            destination: destinationCity,
+            travelers,
+            days,
+            nights,
+            budget,
+            stayType,
+            travelMode,
+            pace,
+            routes,
+          },
+        ],
+      });
+    }
+
+    // ✅ ALWAYS THIS STRUCTURE
     res.json({
-      tripId: trip._id,
       trips: [
         {
           startCity,
@@ -66,6 +87,7 @@ export const generateTrips = async (req, res) => {
           travelers,
           days,
           nights,
+          budget,
           stayType,
           travelMode,
           pace,
@@ -73,8 +95,10 @@ export const generateTrips = async (req, res) => {
         },
       ],
     });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: err.message });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error generating trips",
+      error: error.message,
+    });
   }
 };
