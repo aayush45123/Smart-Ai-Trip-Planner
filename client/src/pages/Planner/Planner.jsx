@@ -1,39 +1,79 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import api from "../../services/api";
 import { useNavigate } from "react-router-dom";
+import { getCityFromCoords } from "../../utils/location";
 import styles from "./Planner.module.css";
 
 export default function Planner() {
-  const [startCity, setStartCity] = useState("Pune");
+  const navigate = useNavigate();
+
+  // BASIC
+  const [startCity, setStartCity] = useState("");
   const [destinationCity, setDestinationCity] = useState("");
-  const [budget, setBudget] = useState(5000);
-  const [days, setDays] = useState(2);
+
+  // TRIP CONSTRAINTS
+  const [travelers, setTravelers] = useState(2);
+  const [days, setDays] = useState(3);
+  const [nights, setNights] = useState(2);
+  const [budget, setBudget] = useState(8000);
+
+  const [stayType, setStayType] = useState("hostel");
+  const [travelMode, setTravelMode] = useState("road");
+  const [pace, setPace] = useState("balanced");
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const navigate = useNavigate();
-
-  async function generateTrip() {
-    if (!destinationCity.trim()) {
-      setError("Please enter a destination city");
+  // 📍 AUTO-DETECT USER CITY ON LOAD
+  useEffect(() => {
+    if (!navigator.geolocation) {
+      setStartCity("Pune");
       return;
     }
 
-    setError("");
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const city = await getCityFromCoords(
+            position.coords.latitude,
+            position.coords.longitude
+          );
+          setStartCity(city || "Pune");
+        } catch {
+          setStartCity("Pune");
+        }
+      },
+      () => {
+        // Permission denied
+        setStartCity("Pune");
+      }
+    );
+  }, []);
+
+  async function generateTrip() {
+    if (!startCity.trim() || !destinationCity.trim()) {
+      setError("Please enter both starting and destination cities");
+      return;
+    }
+
     setLoading(true);
+    setError("");
 
     try {
       const res = await api.post("/trips/generate", {
         startCity,
         destinationCity,
-        budget,
+        travelers,
         days,
+        nights,
+        budget,
+        stayType,
+        travelMode,
+        pace,
       });
 
       navigate("/result", {
-        state: {
-          trips: res.data.trips,
-        },
+        state: { trips: res.data.trips },
       });
     } catch (err) {
       setError(
@@ -48,99 +88,130 @@ export default function Planner() {
   return (
     <div className={styles.container}>
       <div className={styles.wrapper}>
-        <div className={styles.header}>
-          <h2 className={styles.title}>Plan Your Perfect Trip</h2>
-          <p className={styles.subtitle}>
-            Choose start & destination cities to generate real routes
-          </p>
-        </div>
+        <header className={styles.header}>
+          <span className={styles.kicker}>AI-POWERED TRIP PLANNING</span>
+          <h1 className={styles.title}>
+            PLAN YOUR <span>PERFECT</span> TRIP
+          </h1>
+        </header>
 
-        <div className={styles.card}>
+        <div className={`${styles.card} glass-card`}>
           {error && <div className={styles.error}>{error}</div>}
 
           <form className={styles.form} onSubmit={(e) => e.preventDefault()}>
-            {/* START CITY */}
+            {/* START CITY (AUTO-DETECTED + EDITABLE) */}
             <div className={styles.formGroup}>
-              <label className={styles.label}>📍 Starting City</label>
-              <select
-                className={styles.select}
+              <label>Starting City</label>
+              <input
+                type="text"
                 value={startCity}
                 onChange={(e) => setStartCity(e.target.value)}
-                disabled={loading}
-              >
-                <option value="Pune">Pune</option>
-                <option value="Mumbai">Mumbai</option>
-                <option value="Delhi">Delhi</option>
-                <option value="Bangalore">Bangalore</option>
-                <option value="Hyderabad">Hyderabad</option>
-                <option value="Chennai">Chennai</option>
-              </select>
+                placeholder="Detecting your city…"
+              />
             </div>
 
             {/* DESTINATION CITY */}
             <div className={styles.formGroup}>
-              <label className={styles.label}>🏁 Destination City</label>
+              <label>Destination City</label>
               <input
                 type="text"
-                className={styles.input}
-                placeholder="Enter destination city"
+                placeholder="e.g. Ahmedabad"
                 value={destinationCity}
                 onChange={(e) => setDestinationCity(e.target.value)}
-                disabled={loading}
               />
+            </div>
+
+            {/* TRAVELERS */}
+            <div className={styles.formGroup}>
+              <label>Number of Travelers</label>
+              <input
+                type="number"
+                min="1"
+                max="10"
+                value={travelers}
+                onChange={(e) => setTravelers(+e.target.value)}
+              />
+            </div>
+
+            {/* DAYS & NIGHTS */}
+            <div className={styles.grid}>
+              <div className={styles.formGroup}>
+                <label>Days</label>
+                <input
+                  type="number"
+                  min="1"
+                  value={days}
+                  onChange={(e) => setDays(+e.target.value)}
+                />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label>Nights</label>
+                <input
+                  type="number"
+                  min="0"
+                  value={nights}
+                  onChange={(e) => setNights(+e.target.value)}
+                />
+              </div>
             </div>
 
             {/* BUDGET */}
             <div className={styles.formGroup}>
-              <label className={styles.label}>💰 Budget</label>
+              <label>Budget (₹)</label>
               <input
                 type="range"
                 min="2000"
-                max="50000"
+                max="500000"
                 step="500"
                 value={budget}
-                onChange={(e) => setBudget(Number(e.target.value))}
-                disabled={loading}
+                onChange={(e) => setBudget(+e.target.value)}
               />
-              <div>₹{budget.toLocaleString()}</div>
+              <span className={styles.value}>₹{budget.toLocaleString()}</span>
             </div>
 
-            {/* DAYS */}
+            {/* STAY TYPE */}
             <div className={styles.formGroup}>
-              <label className={styles.label}>📅 Number of Days</label>
-              <input
-                type="number"
-                min="1"
-                max="30"
-                value={days}
-                onChange={(e) => setDays(Number(e.target.value))}
-                disabled={loading}
-              />
+              <label>Stay Type</label>
+              <select
+                value={stayType}
+                onChange={(e) => setStayType(e.target.value)}
+              >
+                <option value="hostel">Hostel (Budget)</option>
+                <option value="homestay">Homestay</option>
+                <option value="hotel">Hotel</option>
+              </select>
             </div>
 
-            {/* SUMMARY */}
-            <div className={styles.summary}>
-              <p>
-                <strong>From:</strong> {startCity}
-              </p>
-              <p>
-                <strong>To:</strong> {destinationCity || "—"}
-              </p>
-              <p>
-                <strong>Days:</strong> {days}
-              </p>
-              <p>
-                <strong>Budget:</strong> ₹{budget.toLocaleString()}
-              </p>
+            {/* TRAVEL MODE */}
+            <div className={styles.formGroup}>
+              <label>Travel Mode</label>
+              <select
+                value={travelMode}
+                onChange={(e) => setTravelMode(e.target.value)}
+              >
+                <option value="road">Road</option>
+                <option value="train">Train</option>
+                <option value="mixed">Mixed</option>
+              </select>
             </div>
 
-            {/* BUTTON */}
+            {/* PACE */}
+            <div className={styles.formGroup}>
+              <label>Travel Pace</label>
+              <select value={pace} onChange={(e) => setPace(e.target.value)}>
+                <option value="relaxed">Relaxed</option>
+                <option value="balanced">Balanced</option>
+                <option value="fast">Fast</option>
+              </select>
+            </div>
+
             <button
-              className={styles.generateButton}
-              onClick={generateTrip}
+              className="btn-primary"
               disabled={loading}
+              onClick={generateTrip}
             >
-              {loading ? "⏳ Generating..." : "✨ Generate Trip"}
+              {loading ? "⏳ Generating…" : "START PLANNING →"}
             </button>
           </form>
         </div>

@@ -7,10 +7,55 @@ const tripSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-    startCity: String,
-    days: Number,
-    budget: Number,
-    groupSize: Number,
+
+    startCity: {
+      type: String,
+      required: true,
+    },
+
+    destinationCity: {
+      type: String,
+      required: true,
+    },
+
+    travelers: {
+      type: Number,
+      required: true,
+      min: 1,
+    },
+
+    days: {
+      type: Number,
+      required: true,
+    },
+
+    nights: {
+      type: Number,
+      required: true,
+    },
+
+    budget: {
+      type: Number,
+      required: true,
+    },
+
+    stayType: {
+      type: String,
+      enum: ["hostel", "hotel", "homestay"],
+      default: "hostel",
+    },
+
+    travelMode: {
+      type: String,
+      enum: ["road", "train", "mixed"],
+      default: "road",
+    },
+
+    pace: {
+      type: String,
+      enum: ["relaxed", "balanced", "fast"],
+      default: "balanced",
+    },
   },
   { timestamps: true }
 );

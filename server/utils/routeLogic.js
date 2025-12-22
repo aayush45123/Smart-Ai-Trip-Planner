@@ -1,13 +1,27 @@
-export function classifyRoutes(routes, days, budget) {
+export function classifyRoutes(
+  routes,
+  { days, nights, budget, travelers, stayType, pace }
+) {
+  const stayCostPerNight =
+    stayType === "hotel" ? 1500 : stayType === "homestay" ? 1000 : 500;
+
+  const foodCostPerDay = 300;
+  const paceMultiplier = pace === "fast" ? 1.2 : pace === "relaxed" ? 0.9 : 1;
+
   return routes
     .slice(0, 3)
     .map((r, index) => {
-      const km = (r.distance / 1000).toFixed(1);
-      const hours = (r.duration / 3600).toFixed(1);
+      const distanceKm = +(r.distance / 1000).toFixed(1);
+      const durationHours = +(r.duration / 3600).toFixed(1);
 
-      const travelCost = Math.round(km * 5); // ₹5/km
-      const stayCost = days * 800;
-      const foodCost = days * 300;
+      const travelCost = Math.round(
+        distanceKm * 5 * travelers * paceMultiplier
+      );
+
+      const stayCost = nights * stayCostPerNight * travelers;
+      const foodCost = days * foodCostPerDay * travelers;
+
+      const totalCost = travelCost + stayCost + foodCost;
 
       return {
         id: index,
@@ -16,10 +30,13 @@ export function classifyRoutes(routes, days, budget) {
             ? "Fastest Route"
             : index === 1
             ? "Balanced Route"
-            : "Scenic / Budget Route",
-        distanceKm: km,
-        durationHours: hours,
-        totalCost: travelCost + stayCost + foodCost,
+            : "Budget / Scenic Route",
+        distanceKm,
+        durationHours,
+        travelCost,
+        stayCost,
+        foodCost,
+        totalCost,
         geometry: r.geometry.coordinates,
       };
     })
