@@ -23,7 +23,9 @@ export default function TripResult() {
     setSelectedRoute(trip.routes[0]);
   }, [location.state, navigate]);
 
-  if (!selectedTrip) return <div>Loading…</div>;
+  if (!selectedTrip) {
+    return <div className={styles.loading}>Loading Trip...</div>;
+  }
 
   // Destination center (approx station / city center)
   const destLat = selectedRoute.geometry[selectedRoute.geometry.length - 1][1];
@@ -40,12 +42,13 @@ export default function TripResult() {
           <div key={p.id} className={styles.placeItem}>
             <span>{p.name}</span>
 
-            <span className={styles.distance}>{distance} km</span>
+            <span className={styles.distance}>{distance.toFixed(1)} KM</span>
 
             <button
               className={styles.locateBtn}
               onClick={() => setSelectedPlace(p)}
               title="Show on map"
+              aria-label={`Locate ${p.name} on map`}
             >
               📍
             </button>
@@ -57,6 +60,7 @@ export default function TripResult() {
 
   return (
     <div className={styles.container}>
+      {/* SIDEBAR - PLACES LIST */}
       <aside className={styles.sidebar}>
         <h3>Nearby Places</h3>
 
@@ -67,13 +71,26 @@ export default function TripResult() {
         {renderPlaces("📍 Attractions", selectedTrip.nearby.attractions)}
       </aside>
 
+      {/* MAIN MAP AREA */}
       <main className={styles.main}>
-        <MapView
-          startCity={selectedTrip.startCity}
-          destination={selectedTrip.destination}
-          selectedRoute={selectedRoute}
-          selectedPlace={selectedPlace} // 👈 CONTROLLED
-        />
+        <div className={styles.mapHeader}>
+          <h2>
+            {selectedTrip.startCity} → {selectedTrip.destination}
+          </h2>
+          <p>
+            {selectedTrip.days} Days • {selectedTrip.nights} Nights • ₹
+            {selectedTrip.budget.toLocaleString()}
+          </p>
+        </div>
+
+        <div className={styles.mapWrapper}>
+          <MapView
+            startCity={selectedTrip.startCity}
+            destination={selectedTrip.destination}
+            selectedRoute={selectedRoute}
+            selectedPlace={selectedPlace}
+          />
+        </div>
       </main>
     </div>
   );

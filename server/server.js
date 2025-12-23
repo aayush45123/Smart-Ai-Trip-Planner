@@ -6,6 +6,7 @@ import connectDB from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import tripRoutes from "./routes/tripRoutes.js";
 import aiRoutes from "./routes/aiRoutes.js";
+import geocodeRoutes from "./routes/geocodeRoutes.js";
 
 dotenv.config();
 connectDB();
@@ -24,6 +25,7 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/trips", tripRoutes);
 app.use("/api/ai", aiRoutes);
+app.use("/api/geocode", geocodeRoutes);
 
 app.get("/", (req, res) => {
   res.send("Smart Budget Trip Planner API Running");

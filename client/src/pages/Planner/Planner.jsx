@@ -27,7 +27,7 @@ export default function Planner() {
   // 📍 AUTO-DETECT USER CITY ON LOAD
   useEffect(() => {
     if (!navigator.geolocation) {
-      setStartCity("Pune");
+      // Don't set default city - let it remain empty
       return;
     }
 
@@ -38,14 +38,17 @@ export default function Planner() {
             position.coords.latitude,
             position.coords.longitude
           );
-          setStartCity(city || "Pune");
-        } catch {
-          setStartCity("Pune");
+          if (city) {
+            setStartCity(city);
+          }
+        } catch (err) {
+          console.error("Error getting city:", err);
+          // Don't set default - let user enter manually
         }
       },
-      () => {
-        // Permission denied
-        setStartCity("Pune");
+      (error) => {
+        // Permission denied or error - don't set default
+        console.log("Geolocation permission denied or error:", error);
       }
     );
   }, []);
