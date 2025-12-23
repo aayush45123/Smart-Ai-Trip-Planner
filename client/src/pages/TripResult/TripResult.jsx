@@ -1,15 +1,16 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import MapView from "../../components/MapView/MapView";
+import { getDistanceKm } from "../../utils/distance";
 import styles from "./TripResult.module.css";
 
 export default function TripResult() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [trips, setTrips] = useState([]);
   const [selectedTrip, setSelectedTrip] = useState(null);
   const [selectedRoute, setSelectedRoute] = useState(null);
+  const [selectedPlace, setSelectedPlace] = useState(null);
 
   useEffect(() => {
     if (!location.state?.trips) {
@@ -17,56 +18,63 @@ export default function TripResult() {
       return;
     }
 
-    const incomingTrips = location.state.trips;
-
-    setTrips(incomingTrips);
-    setSelectedTrip(incomingTrips[0]);
-    setSelectedRoute(incomingTrips[0].routes[0]);
+    const trip = location.state.trips[0];
+    setSelectedTrip(trip);
+    setSelectedRoute(trip.routes[0]);
   }, [location.state, navigate]);
 
-  if (!selectedTrip) {
-    return <div className={styles.container}>Loading trips…</div>;
-  }
+  if (!selectedTrip) return <div>Loading…</div>;
+
+  // Destination center (approx station / city center)
+  const destLat = selectedRoute.geometry[selectedRoute.geometry.length - 1][1];
+  const destLon = selectedRoute.geometry[selectedRoute.geometry.length - 1][0];
+
+  const renderPlaces = (title, places) => (
+    <div className={styles.placeGroup}>
+      <h4>{title}</h4>
+
+      {places.map((p) => {
+        const distance = getDistanceKm(destLat, destLon, p.lat, p.lon);
+
+        return (
+          <div key={p.id} className={styles.placeItem}>
+            <span>{p.name}</span>
+
+            <span className={styles.distance}>{distance} km</span>
+
+            <button
+              className={styles.locateBtn}
+              onClick={() => setSelectedPlace(p)}
+              title="Show on map"
+            >
+              📍
+            </button>
+          </div>
+        );
+      })}
+    </div>
+  );
 
   return (
     <div className={styles.container}>
-      <div className={styles.wrapper}>
-        <header className={styles.header}>
-          <h2>Your Trip Options</h2>
-          <p>
-            {selectedTrip.startCity} → {selectedTrip.destination}
-          </p>
-        </header>
+      <aside className={styles.sidebar}>
+        <h3>Nearby Places</h3>
 
-        <div className={styles.content}>
-          {/* ROUTES SIDEBAR */}
-          <aside className={styles.sidebar}>
-            {selectedTrip.routes.map((route, i) => (
-              <div
-                key={i}
-                className={`${styles.routeCard} ${
-                  selectedRoute === route ? styles.active : ""
-                }`}
-                onClick={() => setSelectedRoute(route)}
-              >
-                <h4>{route.type}</h4>
-                <p>📏 {route.distanceKm} km</p>
-                <p>⏱ {route.durationHours} hrs</p>
-                <p>💰 ₹{route.totalCost}</p>
-              </div>
-            ))}
-          </aside>
+        {renderPlaces("🏨 Hotels", selectedTrip.nearby.hotels)}
 
-          {/* MAP */}
-          <main className={styles.main}>
-            <MapView
-              startCity={selectedTrip.startCity}
-              destination={selectedTrip.destination}
-              selectedRoute={selectedRoute}
-            />
-          </main>
-        </div>
-      </div>
+        {renderPlaces("🍽 Restaurants", selectedTrip.nearby.restaurants)}
+
+        {renderPlaces("📍 Attractions", selectedTrip.nearby.attractions)}
+      </aside>
+
+      <main className={styles.main}>
+        <MapView
+          startCity={selectedTrip.startCity}
+          destination={selectedTrip.destination}
+          selectedRoute={selectedRoute}
+          selectedPlace={selectedPlace} // 👈 CONTROLLED
+        />
+      </main>
     </div>
   );
 }

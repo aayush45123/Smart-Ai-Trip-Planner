@@ -2,6 +2,7 @@ import Trip from "../models/Trip.js";
 import { geocodeCity } from "../utils/geoCode.js";
 import { getRoutes } from "../utils/getRoutes.js";
 import { classifyRoutes } from "../utils/routeLogic.js";
+import { getNearbyPlaces } from "../utils/getNearByPlaces.js";
 
 export const generateTrips = async (req, res) => {
   try {
@@ -23,7 +24,6 @@ export const generateTrips = async (req, res) => {
       });
     }
 
-    // Save preferences
     await Trip.create({
       userId: req.user._id,
       startCity,
@@ -57,28 +57,30 @@ export const generateTrips = async (req, res) => {
       });
     }
 
-    // Practical warning
-    if (routes[0].distanceKm > 3000) {
-      return res.json({
-        warning: "Road travel for this destination may not be practical.",
-        trips: [
-          {
-            startCity,
-            destination: destinationCity,
-            travelers,
-            days,
-            nights,
-            budget,
-            stayType,
-            travelMode,
-            pace,
-            routes,
-          },
-        ],
-      });
-    }
+    // 🔥 Fetch nearby places
+    const hotels = await getNearbyPlaces(
+      endCoords.lat,
+      endCoords.lng,
+      stayType
+    );
 
-    // ✅ ALWAYS THIS STRUCTURE
+    const restaurants = await getNearbyPlaces(
+      endCoords.lat,
+      endCoords.lng,
+      "restaurant"
+    );
+
+    const attractions = await getNearbyPlaces(
+      endCoords.lat,
+      endCoords.lng,
+      "attraction"
+    );
+
+    // 🔍 DEBUG LOGS (REMOVE LATER)
+    console.log("Hotels:", hotels.length);
+    console.log("Restaurants:", restaurants.length);
+    console.log("Attractions:", attractions.length);
+
     res.json({
       trips: [
         {
@@ -92,6 +94,11 @@ export const generateTrips = async (req, res) => {
           travelMode,
           pace,
           routes,
+          nearby: {
+            hotels,
+            restaurants,
+            attractions,
+          },
         },
       ],
     });

@@ -1,26 +1,34 @@
 import axios from "axios";
 
-export async function getNearbyHotels(lat, lon) {
+export async function getNearbyPlaces(lat, lon, type = "hotel") {
+  const radius = 15000; // 🔥 15 km (IMPORTANT)
+
+  let tagQuery = "";
+
+  if (type === "hotel") tagQuery = '["tourism"~"hotel|guest_house"]';
+  if (type === "hostel") tagQuery = '["tourism"~"hostel|guest_house"]';
+  if (type === "restaurant") tagQuery = '["amenity"="restaurant"]';
+  if (type === "attraction") tagQuery = '["tourism"="attraction"]';
+
   const query = `
-    [out:json];
+    [out:json][timeout:25];
     (
-      node["tourism"="hotel"](around:5000,${lat},${lon});
-      node["tourism"="hostel"](around:5000,${lat},${lon});
-      node["tourism"="guest_house"](around:5000,${lat},${lon});
+      node${tagQuery}(around:${radius},${lat},${lon});
     );
-    out body 10;
+    out body;
   `;
 
-  const url = "https://overpass-api.de/api/interpreter";
+  const res = await axios.post(
+    "https://overpass-api.de/api/interpreter",
+    query,
+    { headers: { "Content-Type": "text/plain" } }
+  );
 
-  const res = await axios.post(url, query, {
-    headers: { "Content-Type": "text/plain" },
-  });
-
-  return res.data.elements.map((p) => ({
-    name: p.tags.name || "Unnamed stay",
-    lat: p.lat,
-    lng: p.lon,
-    type: p.tags.tourism,
+  return res.data.elements.map((place) => ({
+    id: place.id,
+    name: place.tags?.name || "Unnamed Place",
+    lat: place.lat,
+    lon: place.lon,
+    type,
   }));
 }
