@@ -24,6 +24,13 @@ export const generateTrips = async (req, res) => {
       });
     }
 
+    // ✅ HARD GUARD (NO CRASH EVER)
+    if (!req.user || !req.user._id) {
+      return res.status(401).json({
+        message: "Unauthorized. Please login again.",
+      });
+    }
+
     await Trip.create({
       userId: req.user._id,
       startCity,
@@ -37,10 +44,32 @@ export const generateTrips = async (req, res) => {
       pace,
     });
 
-    const startCoords = await geocodeCity(startCity);
-    const endCoords = await geocodeCity(destinationCity);
+    let startCoords;
+    let endCoords;
 
-    const rawRoutes = await getRoutes(startCoords, endCoords);
+    try {
+      startCoords = await geocodeCity(startCity);
+      endCoords = await geocodeCity(destinationCity);
+    } catch (geoErr) {
+      console.error("Geocoding failed:", geoErr.message);
+      return res.status(502).json({
+        message:
+          "Location lookup failed. Try different cities or retry shortly.",
+        error: geoErr.message,
+      });
+    }
+
+    let rawRoutes;
+
+    try {
+      rawRoutes = await getRoutes(startCoords, endCoords);
+    } catch (routeErr) {
+      console.error("Route service failed:", routeErr.message);
+      return res.status(502).json({
+        message: "Routing service unavailable. Please try again in a moment.",
+        error: routeErr.message,
+      });
+    }
 
     const routes = classifyRoutes(rawRoutes, {
       days,
@@ -57,31 +86,24 @@ export const generateTrips = async (req, res) => {
       });
     }
 
-    // 🔥 Fetch nearby places
-    const hotels = await getNearbyPlaces(
-      endCoords.lat,
-      endCoords.lng,
-      stayType
-    );
+    const lodgingType = stayType === "hostel" ? "hostel" : "hotel";
 
-    const restaurants = await getNearbyPlaces(
-      endCoords.lat,
-      endCoords.lng,
-      "restaurant"
-    );
+    const safeNearbyFetch = async (type) => {
+      try {
+        return await getNearbyPlaces(endCoords.lat, endCoords.lng, type);
+      } catch (nearbyErr) {
+        console.error(`Nearby lookup failed for ${type}:`, nearbyErr.message);
+        return [];
+      }
+    };
 
-    const attractions = await getNearbyPlaces(
-      endCoords.lat,
-      endCoords.lng,
-      "attraction"
-    );
+    const [hotels, restaurants, attractions] = await Promise.all([
+      safeNearbyFetch(lodgingType),
+      safeNearbyFetch("restaurant"),
+      safeNearbyFetch("attraction"),
+    ]);
 
-    // 🔍 DEBUG LOGS (REMOVE LATER)
-    console.log("Hotels:", hotels.length);
-    console.log("Restaurants:", restaurants.length);
-    console.log("Attractions:", attractions.length);
-
-    res.json({
+    return res.json({
       trips: [
         {
           startCity,
@@ -103,7 +125,8 @@ export const generateTrips = async (req, res) => {
       ],
     });
   } catch (error) {
-    res.status(500).json({
+    console.error("Trip generation error:", error);
+    return res.status(500).json({
       message: "Error generating trips",
       error: error.message,
     });
