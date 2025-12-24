@@ -21,7 +21,6 @@ import {
   Camera,
   Mountain,
 } from "lucide-react";
-import Navbar from "../../components/Navbar/Navbar";
 import delhi from "../../assets/delhi.jpeg";
 import mumbai from "../../assets/mumbai.jpg";
 import kashmir from "../../assets/kashmir.jpeg";
@@ -151,8 +150,6 @@ const Home = () => {
 
   return (
     <>
-      <Navbar />
-
       {/* Cursor Glow */}
       <div
         className={styles.cursorGlow}
