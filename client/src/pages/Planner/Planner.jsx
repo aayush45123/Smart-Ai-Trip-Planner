@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import api from "../../services/api";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { getCityFromCoords } from "../../utils/location";
 import styles from "./Planner.module.css";
 
 export default function Planner() {
   const navigate = useNavigate();
+  const location = useLocation();
 
   // BASIC
   const [startCity, setStartCity] = useState("");
@@ -23,6 +24,13 @@ export default function Planner() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  // Prefill destination when coming from cards
+  useEffect(() => {
+    if (location.state?.destinationCity) {
+      setDestinationCity(location.state.destinationCity);
+    }
+  }, [location.state]);
 
   // 📍 AUTO-DETECT USER CITY ON LOAD
   useEffect(() => {

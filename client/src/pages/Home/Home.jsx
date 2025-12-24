@@ -50,8 +50,14 @@ const Home = () => {
     isAuthenticated ? navigate("/planner") : navigate("/login");
   };
 
-  const handlePlanTrip = () => {
-    isAuthenticated ? navigate("/planner") : navigate("/signup");
+  const handlePlanTrip = (destinationCity) => {
+    if (isAuthenticated) {
+      navigate("/planner", {
+        state: { destinationCity },
+      });
+    } else {
+      navigate("/signup");
+    }
   };
 
   const features = [
@@ -368,7 +374,7 @@ const Home = () => {
               <div
                 key={i}
                 className={`${styles.destCard} ${styles[`dest${i + 1}`]}`}
-                onClick={handlePlanTrip}
+                onClick={() => handlePlanTrip(dest.name)}
               >
                 <div className={styles.destCorner}></div>
                 <div className={styles.destImage}>
