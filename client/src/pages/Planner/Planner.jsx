@@ -96,6 +96,25 @@ export default function Planner() {
     }
   }
 
+  async function aiAutoFill() {
+    try {
+      const res = await api.post("/ai/prefill", {
+        startCity,
+        destinationCity,
+        travelers,
+      });
+
+      setDays(res.data.days);
+      setNights(res.data.nights);
+      setBudget(res.data.budget);
+      setStayType(res.data.stayType);
+      setTravelMode(res.data.travelMode);
+      setPace(res.data.pace);
+    } catch {
+      alert("AI failed to suggest trip");
+    }
+  }
+
   return (
     <div className={styles.container}>
       <div className={styles.wrapper}>
@@ -216,6 +235,10 @@ export default function Planner() {
                 <option value="fast">Fast</option>
               </select>
             </div>
+
+            <button className={styles.aiBtn} onClick={aiAutoFill}>
+              🤖 AI AUTO-FILL TRIP
+            </button>
 
             <button
               className="btn-primary"

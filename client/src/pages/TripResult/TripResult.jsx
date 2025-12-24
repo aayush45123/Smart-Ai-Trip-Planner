@@ -11,6 +11,7 @@ export default function TripResult() {
   const [selectedTrip, setSelectedTrip] = useState(null);
   const [selectedRoute, setSelectedRoute] = useState(null);
   const [selectedPlace, setSelectedPlace] = useState(null);
+  const [aiTips, setAiTips] = useState(null);
 
   useEffect(() => {
     if (!location.state?.trips) {
@@ -22,6 +23,16 @@ export default function TripResult() {
     setSelectedTrip(trip);
     setSelectedRoute(trip.routes[0]);
   }, [location.state, navigate]);
+
+  useEffect(() => {
+    async function fetchAiTips() {
+      const res = await api.post("/ai/recommendations", {
+        destinationCity: selectedTrip.destination,
+      });
+      setAiTips(res.data);
+    }
+    fetchAiTips();
+  }, [selectedTrip.destination]);
 
   if (!selectedTrip) {
     return <div className={styles.loading}>Loading Trip...</div>;
@@ -70,6 +81,43 @@ export default function TripResult() {
 
         {renderPlaces("📍 Attractions", selectedTrip.nearby.attractions)}
       </aside>
+
+      {aiTips && (
+        <aside className={styles.aiSidebar}>
+          <h3>🤖 AI RECOMMENDATIONS</h3>
+
+          <h4>Must Visit</h4>
+          <ul>
+            {aiTips.mustVisit.map((p, i) => (
+              <li key={i}>{p}</li>
+            ))}
+          </ul>
+
+          <h4>Local Food</h4>
+          <ul>
+            {aiTips.localFood.map((f, i) => (
+              <li key={i}>{f}</li>
+            ))}
+          </ul>
+
+          <h4>Best Areas</h4>
+          <ul>
+            {aiTips.bestAreasToStay.map((a, i) => (
+              <li key={i}>{a}</li>
+            ))}
+          </ul>
+
+          <h4>Best Time</h4>
+          <p>{aiTips.bestTimeToExplore}</p>
+
+          <h4>Safety Tips</h4>
+          <ul>
+            {aiTips.safetyTips.map((s, i) => (
+              <li key={i}>{s}</li>
+            ))}
+          </ul>
+        </aside>
+      )}
 
       {/* MAIN MAP AREA */}
       <main className={styles.main}>

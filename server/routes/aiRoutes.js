@@ -1,8 +1,13 @@
 import express from "express";
-import { generateItinerary } from "../controllers/aiController.js";
+import auth from "../middleware/authMiddleware.js";
+import {
+  aiPrefillTrip,
+  aiDestinationTips,
+} from "../controllers/aiController.js";
 
 const router = express.Router();
 
-router.post("/itinerary", generateItinerary);
+router.post("/prefill", auth, aiPrefillTrip);
+router.post("/destination-tips", auth, aiDestinationTips);
 
 export default router;
