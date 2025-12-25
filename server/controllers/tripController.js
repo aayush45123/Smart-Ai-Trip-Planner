@@ -3,6 +3,7 @@ import { geocodeCity } from "../utils/geoCode.js";
 import { getRoutes } from "../utils/getRoutes.js";
 import { classifyRoutes } from "../utils/routeLogic.js";
 import { getNearbyPlaces } from "../utils/getNearByPlaces.js";
+import { getDistance } from "../utils/distance.js";
 
 export const generateTrips = async (req, res) => {
   try {
@@ -24,13 +25,13 @@ export const generateTrips = async (req, res) => {
       });
     }
 
-    // ✅ HARD GUARD (NO CRASH EVER)
     if (!req.user || !req.user._id) {
       return res.status(401).json({
         message: "Unauthorized. Please login again.",
       });
     }
 
+    // ✅ SAVE TRIP TO DATABASE
     await Trip.create({
       userId: req.user._id,
       startCity,
@@ -44,25 +45,40 @@ export const generateTrips = async (req, res) => {
       pace,
     });
 
+    // ✅ GET REAL COORDINATES
     let startCoords;
     let endCoords;
 
     try {
+      console.log(`Geocoding: ${startCity} -> ${destinationCity}`);
       startCoords = await geocodeCity(startCity);
       endCoords = await geocodeCity(destinationCity);
+      console.log("Coordinates found:", { startCoords, endCoords });
     } catch (geoErr) {
       console.error("Geocoding failed:", geoErr.message);
       return res.status(502).json({
         message:
-          "Location lookup failed. Try different cities or retry shortly.",
+          "Could not find these cities. Please check spelling and try again.",
         error: geoErr.message,
       });
     }
 
+    // ✅ CALCULATE REAL DISTANCE
+    const actualDistance = getDistance(
+      startCoords.lat,
+      startCoords.lng,
+      endCoords.lat,
+      endCoords.lng
+    );
+    console.log(`Actual distance: ${actualDistance.toFixed(2)} km`);
+
+    // ✅ GET REAL ROUTES
     let rawRoutes;
 
     try {
+      console.log("Fetching routes from OSRM...");
       rawRoutes = await getRoutes(startCoords, endCoords);
+      console.log(`Found ${rawRoutes.length} routes`);
     } catch (routeErr) {
       console.error("Route service failed:", routeErr.message);
       return res.status(502).json({
@@ -71,6 +87,7 @@ export const generateTrips = async (req, res) => {
       });
     }
 
+    // ✅ CLASSIFY ROUTES WITH REAL DATA
     const routes = classifyRoutes(rawRoutes, {
       days,
       nights,
@@ -80,13 +97,34 @@ export const generateTrips = async (req, res) => {
       pace,
     });
 
+    console.log(`Classified ${routes.length} routes within budget`);
+
     if (!routes.length) {
+      // Calculate minimum required budget
+      const minTravelCost = Math.round(actualDistance * 5 * travelers);
+      const minStayCost = nights * 500 * travelers;
+      const minFoodCost = days * 300 * travelers;
+      const minBudget = minTravelCost + minStayCost + minFoodCost;
+
       return res.status(400).json({
-        message: "No routes found within budget",
+        message: "No routes found within your budget",
+        suggestion: `Try increasing your budget to at least ₹${minBudget.toLocaleString()} for this trip.`,
+        details: {
+          distance: `${actualDistance.toFixed(0)} km`,
+          minimumBudget: minBudget,
+          breakdown: {
+            travel: minTravelCost,
+            stay: minStayCost,
+            food: minFoodCost,
+          },
+        },
       });
     }
 
+    // ✅ GET REAL NEARBY PLACES
     const lodgingType = stayType === "hostel" ? "hostel" : "hotel";
+
+    console.log("Fetching nearby places...");
 
     const safeNearbyFetch = async (type) => {
       try {
@@ -103,6 +141,10 @@ export const generateTrips = async (req, res) => {
       safeNearbyFetch("attraction"),
     ]);
 
+    console.log(
+      `Found: ${hotels.length} hotels, ${restaurants.length} restaurants, ${attractions.length} attractions`
+    );
+
     return res.json({
       trips: [
         {
@@ -115,6 +157,7 @@ export const generateTrips = async (req, res) => {
           stayType,
           travelMode,
           pace,
+          actualDistance: Math.round(actualDistance),
           routes,
           nearby: {
             hotels,

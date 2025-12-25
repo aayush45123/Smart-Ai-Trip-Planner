@@ -25,6 +25,7 @@ export default function Planner() {
   const [loading, setLoading] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
   const [error, setError] = useState("");
+  const [aiMetadata, setAiMetadata] = useState(null);
 
   // Prefill destination when coming from cards
   useEffect(() => {
@@ -85,10 +86,17 @@ export default function Planner() {
         state: { trips: res.data.trips },
       });
     } catch (err) {
-      setError(
+      const errorMsg =
         err.response?.data?.message ||
-          "Failed to generate trip. Please try again."
-      );
+        "Failed to generate trip. Please try again.";
+      const suggestion = err.response?.data?.suggestion;
+      const details = err.response?.data?.details;
+
+      let fullError = errorMsg;
+      if (suggestion) fullError += `\n\n${suggestion}`;
+      if (details?.distance) fullError += `\n\nDistance: ${details.distance}`;
+
+      setError(fullError);
     } finally {
       setLoading(false);
     }
@@ -102,6 +110,7 @@ export default function Planner() {
 
     setAiLoading(true);
     setError("");
+    setAiMetadata(null);
 
     try {
       const res = await api.post("/ai/prefill", {
@@ -118,8 +127,18 @@ export default function Planner() {
       if (res.data.travelMode) setTravelMode(res.data.travelMode);
       if (res.data.pace) setPace(res.data.pace);
 
-      // Show success message
-      alert("✅ AI has auto-filled the trip details!");
+      // Store metadata to show user
+      if (res.data.metadata) {
+        setAiMetadata(res.data.metadata);
+      }
+
+      // Show success message with real data
+      const message = res.data.metadata
+        ? `✅ AI calculated based on actual distance: ${res.data.metadata.actualDistance} km\n` +
+          `Estimated travel time: ${res.data.metadata.estimatedTravelTime}`
+        : "✅ AI has auto-filled the trip details!";
+
+      alert(message);
     } catch (err) {
       console.error("AI Auto-fill Error:", err);
       setError("AI auto-fill failed. You can still plan your trip manually.");
@@ -139,7 +158,32 @@ export default function Planner() {
         </header>
 
         <div className={`${styles.card} glass-card`}>
-          {error && <div className={styles.error}>{error}</div>}
+          {error && (
+            <div className={styles.error} style={{ whiteSpace: "pre-line" }}>
+              {error}
+            </div>
+          )}
+
+          {aiMetadata && (
+            <div
+              className={styles.aiInfo}
+              style={{
+                background: "rgba(6, 182, 212, 0.1)",
+                border: "1px solid rgba(6, 182, 212, 0.3)",
+                padding: "12px",
+                borderRadius: "8px",
+                marginBottom: "16px",
+                fontSize: "14px",
+                color: "#06b6d4",
+              }}
+            >
+              <strong>🤖 AI Calculation:</strong>
+              <br />
+              Distance: {aiMetadata.actualDistance} km
+              <br />
+              Travel Time: {aiMetadata.estimatedTravelTime}
+            </div>
+          )}
 
           <form className={styles.form} onSubmit={(e) => e.preventDefault()}>
             {/* START CITY (AUTO-DETECTED + EDITABLE) */}
@@ -220,9 +264,9 @@ export default function Planner() {
                 value={stayType}
                 onChange={(e) => setStayType(e.target.value)}
               >
-                <option value="hostel">Hostel (Budget)</option>
-                <option value="homestay">Homestay</option>
-                <option value="hotel">Hotel</option>
+                <option value="hostel">Hostel (₹600/night)</option>
+                <option value="homestay">Homestay (₹1200/night)</option>
+                <option value="hotel">Hotel (₹2000/night)</option>
               </select>
             </div>
 
@@ -233,9 +277,9 @@ export default function Planner() {
                 value={travelMode}
                 onChange={(e) => setTravelMode(e.target.value)}
               >
-                <option value="road">Road</option>
+                <option value="road">Road (Bus/Car)</option>
                 <option value="train">Train</option>
-                <option value="mixed">Mixed</option>
+                <option value="mixed">Mixed (Train + Road)</option>
               </select>
             </div>
 
@@ -243,9 +287,9 @@ export default function Planner() {
             <div className={styles.formGroup}>
               <label>Travel Pace</label>
               <select value={pace} onChange={(e) => setPace(e.target.value)}>
-                <option value="relaxed">Relaxed</option>
-                <option value="balanced">Balanced</option>
-                <option value="fast">Fast</option>
+                <option value="relaxed">Relaxed (More rest time)</option>
+                <option value="balanced">Balanced (Standard)</option>
+                <option value="fast">Fast (More activities)</option>
               </select>
             </div>
 
@@ -254,7 +298,9 @@ export default function Planner() {
               onClick={aiAutoFill}
               disabled={aiLoading || !startCity || !destinationCity}
             >
-              {aiLoading ? "⏳ AI Working..." : "🤖 AI AUTO-FILL TRIP"}
+              {aiLoading
+                ? "⏳ Calculating real distance..."
+                : "🤖 AI AUTO-FILL TRIP"}
             </button>
 
             <button

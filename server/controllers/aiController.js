@@ -1,67 +1,29 @@
 import { getGroqClient } from "../utils/groqClient.js";
+import { geocodeCity } from "../utils/geoCode.js";
+import { getDistance } from "../utils/distance.js";
 
 /**
- * AI Trip Prefill
+ * AI Trip Prefill - Uses REAL distance and location data
  */
 export const aiPrefillTrip = async (req, res) => {
   try {
-    const groq = getGroqClient();
-
     const { startCity, destinationCity, travelers } = req.body;
 
-    const prompt = `You are a travel planning expert. Based on the following trip details, suggest optimal trip parameters.
-
-Trip Details:
-- From: ${startCity}
-- To: ${destinationCity}
-- Number of travelers: ${travelers}
-
-Provide a JSON response with the following structure (ONLY JSON, no other text):
-{
-  "days": <number between 3-7>,
-  "nights": <number, should be days-1>,
-  "budget": <number in INR, between 5000-50000>,
-  "stayType": "<one of: hostel, hotel, homestay>",
-  "travelMode": "<one of: road, train, mixed>",
-  "pace": "<one of: relaxed, balanced, fast>"
-}
-
-Consider:
-- Distance between cities
-- Number of travelers
-- Typical costs in India
-- Reasonable trip duration`;
-
-    const completion = await groq.chat.completions.create({
-      model: "llama-3.3-70b-versatile",
-      messages: [
-        {
-          role: "system",
-          content: "You are a helpful travel planning assistant. Always respond with valid JSON only, no additional text or markdown formatting."
-        },
-        {
-          role: "user",
-          content: prompt
-        }
-      ],
-      temperature: 0.3,
-      max_tokens: 500,
-    });
-
-    let responseText = completion.choices[0].message.content.trim();
+    // ✅ GET REAL COORDINATES AND DISTANCE
+    let startCoords, endCoords, distanceKm;
     
-    // Remove markdown code blocks if present
-    responseText = responseText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-    
-    // Try to parse the JSON
-    let parsedData;
     try {
-      parsedData = JSON.parse(responseText);
-    } catch (parseError) {
-      console.error("JSON Parse Error:", parseError);
-      console.error("Response text:", responseText);
-      
-      // Return default values if parsing fails
+      startCoords = await geocodeCity(startCity);
+      endCoords = await geocodeCity(destinationCity);
+      distanceKm = getDistance(
+        startCoords.lat,
+        startCoords.lng,
+        endCoords.lat,
+        endCoords.lng
+      );
+    } catch (geoError) {
+      console.error("Geocoding failed:", geoError);
+      // Fallback to defaults if geocoding fails
       return res.json({
         days: 3,
         nights: 2,
@@ -72,29 +34,73 @@ Consider:
       });
     }
 
-    // Validate and sanitize the response
-    const validatedData = {
-      days: Math.max(1, Math.min(15, parseInt(parsedData.days) || 3)),
-      nights: Math.max(0, Math.min(14, parseInt(parsedData.nights) || 2)),
-      budget: Math.max(2000, Math.min(500000, parseInt(parsedData.budget) || 10000)),
-      stayType: ['hostel', 'hotel', 'homestay'].includes(parsedData.stayType) 
-        ? parsedData.stayType 
-        : 'hostel',
-      travelMode: ['road', 'train', 'mixed'].includes(parsedData.travelMode)
-        ? parsedData.travelMode
-        : 'road',
-      pace: ['relaxed', 'balanced', 'fast'].includes(parsedData.pace)
-        ? parsedData.pace
-        : 'balanced'
+    // ✅ CALCULATE REALISTIC VALUES BASED ON ACTUAL DISTANCE
+    const hours = distanceKm / 60; // Assuming 60 km/h average
+    
+    let days, nights, budget, stayType, travelMode, pace;
+
+    // Distance-based logic
+    if (distanceKm < 200) {
+      days = 2;
+      nights = 1;
+      budget = Math.round(3000 + (distanceKm * 10) * travelers);
+      travelMode = "road";
+      pace = "balanced";
+    } else if (distanceKm < 500) {
+      days = 3;
+      nights = 2;
+      budget = Math.round(6000 + (distanceKm * 8) * travelers);
+      travelMode = distanceKm > 300 ? "train" : "road";
+      pace = "balanced";
+    } else if (distanceKm < 1000) {
+      days = 4;
+      nights = 3;
+      budget = Math.round(10000 + (distanceKm * 6) * travelers);
+      travelMode = "train";
+      pace = "balanced";
+    } else {
+      days = 5;
+      nights = 4;
+      budget = Math.round(15000 + (distanceKm * 5) * travelers);
+      travelMode = "mixed";
+      pace = "fast";
+    }
+
+    // Budget-based stay type
+    const budgetPerPerson = budget / travelers;
+    if (budgetPerPerson < 5000) {
+      stayType = "hostel";
+    } else if (budgetPerPerson < 15000) {
+      stayType = "homestay";
+    } else {
+      stayType = "hotel";
+    }
+
+    // Cap budget at max
+    budget = Math.min(budget, 500000);
+
+    const responseData = {
+      days,
+      nights,
+      budget,
+      stayType,
+      travelMode,
+      pace,
+      metadata: {
+        actualDistance: Math.round(distanceKm),
+        estimatedTravelTime: `${Math.round(hours)} hours`,
+        calculatedFrom: "real coordinates"
+      }
     };
 
-    res.json(validatedData);
+    console.log("AI Prefill Response:", responseData);
+
+    res.json(responseData);
   } catch (err) {
     console.error("AI Prefill Error:", err);
     res.status(500).json({ 
       message: "AI prefill failed", 
       error: err.message,
-      // Return default values on error
       days: 3,
       nights: 2,
       budget: 10000,
@@ -106,48 +112,60 @@ Consider:
 };
 
 /**
- * AI Destination Recommendations
+ * AI Destination Recommendations - Uses real location context
  */
 export const aiDestinationTips = async (req, res) => {
   try {
     const groq = getGroqClient();
-
     const { destinationCity } = req.body;
 
-    const prompt = `You are a local travel expert for ${destinationCity}, India.
+    // ✅ GET REAL COORDINATES to provide context to AI
+    let coords;
+    try {
+      coords = await geocodeCity(destinationCity);
+    } catch (geoError) {
+      console.error("Geocoding failed for destination:", geoError);
+    }
 
-Provide travel recommendations in the following JSON format (ONLY JSON, no other text):
+    const locationContext = coords 
+      ? `The destination ${destinationCity} is located at coordinates (${coords.lat.toFixed(2)}, ${coords.lng.toFixed(2)}).`
+      : "";
 
+    const prompt = `You are a knowledgeable travel guide for India. Provide REAL, SPECIFIC recommendations for ${destinationCity}, India.
+
+${locationContext}
+
+Research and provide accurate, well-known places in ${destinationCity}. If you don't know specific places, say so - do not make up fake places.
+
+Respond ONLY with valid JSON in this exact format:
 {
-  "mustVisit": ["place1", "place2", "place3"],
-  "localFood": ["food1", "food2", "food3"],
-  "bestAreasToStay": ["area1", "area2", "area3"],
-  "safetyTips": ["tip1", "tip2", "tip3"],
-  "bestTimeToExplore": "description of best time",
-  "extraTips": ["tip1", "tip2"]
+  "mustVisit": ["specific landmark 1", "specific landmark 2", "specific landmark 3"],
+  "localFood": ["specific dish 1", "specific dish 2", "specific dish 3"],
+  "bestAreasToStay": ["specific area 1", "specific area 2", "specific area 3"],
+  "safetyTips": ["practical tip 1", "practical tip 2", "practical tip 3"],
+  "bestTimeToExplore": "specific time recommendation with reason",
+  "extraTips": ["useful tip 1", "useful tip 2"]
 }
 
-Provide specific, actionable recommendations for ${destinationCity}.`;
+Use real place names, real dishes, and real neighborhoods. Be specific and accurate.`;
 
     const completion = await groq.chat.completions.create({
       model: "llama-3.3-70b-versatile",
       messages: [
         {
           role: "system",
-          content: "You are a helpful travel guide. Always respond with valid JSON only, no additional text or markdown formatting."
+          content: "You are a travel expert with extensive knowledge of Indian cities. Provide only accurate, real information. If you don't know specific details, provide general but accurate advice. Always respond with valid JSON only."
         },
         {
           role: "user",
           content: prompt
         }
       ],
-      temperature: 0.4,
+      temperature: 0.3, // Lower temperature for more factual responses
       max_tokens: 1000,
     });
 
     let responseText = completion.choices[0].message.content.trim();
-    
-    // Remove markdown code blocks if present
     responseText = responseText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
     
     let parsedData;
@@ -157,14 +175,14 @@ Provide specific, actionable recommendations for ${destinationCity}.`;
       console.error("JSON Parse Error:", parseError);
       console.error("Response text:", responseText);
       
-      // Return default structure if parsing fails
+      // Return location-aware defaults
       return res.json({
-        mustVisit: ["Local attractions", "Historical sites", "Popular landmarks"],
-        localFood: ["Local cuisine", "Street food", "Traditional dishes"],
-        bestAreasToStay: ["City center", "Tourist area", "Budget-friendly zone"],
-        safetyTips: ["Stay aware of surroundings", "Keep valuables secure", "Use trusted transportation"],
-        bestTimeToExplore: ["Early morning or evening for pleasant weather"],
-        extraTips: ["Book accommodations in advance", "Learn basic local phrases"]
+        mustVisit: [`Historic sites in ${destinationCity}`, `Local markets`, `Cultural centers`],
+        localFood: ["Regional specialties", "Street food", "Traditional restaurants"],
+        bestAreasToStay: ["City center", "Near major attractions", "Well-connected areas"],
+        safetyTips: ["Use registered transportation", "Keep valuables secure", "Stay in well-lit areas at night"],
+        bestTimeToExplore: ["Early morning (6-10 AM) or evening (4-7 PM) for pleasant weather"],
+        extraTips: ["Book accommodations in advance", "Learn basic local phrases", "Carry cash for local vendors"]
       });
     }
 
