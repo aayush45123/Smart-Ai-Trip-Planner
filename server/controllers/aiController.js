@@ -23,61 +23,114 @@ export const aiPrefillTrip = async (req, res) => {
       );
     } catch (geoError) {
       console.error("Geocoding failed:", geoError);
-      // Fallback to defaults if geocoding fails
       return res.json({
         days: 3,
         nights: 2,
-        budget: 10000,
+        budget: 15000,
         stayType: "hostel",
         travelMode: "road",
         pace: "balanced"
       });
     }
 
+    console.log(`AI Prefill: ${startCity} -> ${destinationCity} = ${distanceKm.toFixed(0)} km`);
+
     // ✅ CALCULATE REALISTIC VALUES BASED ON ACTUAL DISTANCE
-    const hours = distanceKm / 60; // Assuming 60 km/h average
-    
     let days, nights, budget, stayType, travelMode, pace;
+
+    // Base costs per person
+    const foodPerDay = 500;
+    const activityPerDay = 400;
 
     // Distance-based logic
     if (distanceKm < 200) {
+      // Short trip (e.g., Mumbai to Pune)
       days = 2;
       nights = 1;
-      budget = Math.round(3000 + (distanceKm * 10) * travelers);
       travelMode = "road";
       pace = "balanced";
+      
+      const travelCost = Math.round(distanceKm * 10 * travelers); // ₹10/km for short distances
+      const stayCost = 600 * nights * travelers; // Hostel
+      const foodCost = foodPerDay * days * travelers;
+      const activityCost = activityPerDay * days * travelers;
+      const buffer = Math.round((travelCost + stayCost + foodCost + activityCost) * 0.15);
+      
+      budget = travelCost + stayCost + foodCost + activityCost + buffer;
+      stayType = "hostel";
+      
     } else if (distanceKm < 500) {
+      // Medium trip (e.g., Mumbai to Goa)
       days = 3;
       nights = 2;
-      budget = Math.round(6000 + (distanceKm * 8) * travelers);
       travelMode = distanceKm > 300 ? "train" : "road";
       pace = "balanced";
+      
+      const travelCost = Math.round(distanceKm * 8 * travelers); // ₹8/km
+      const stayCost = 800 * nights * travelers; // Better hostel/budget hotel
+      const foodCost = foodPerDay * days * travelers;
+      const activityCost = activityPerDay * days * travelers;
+      const buffer = Math.round((travelCost + stayCost + foodCost + activityCost) * 0.15);
+      
+      budget = travelCost + stayCost + foodCost + activityCost + buffer;
+      stayType = "hostel";
+      
     } else if (distanceKm < 1000) {
+      // Long trip (e.g., Mumbai to Jaipur)
       days = 4;
       nights = 3;
-      budget = Math.round(10000 + (distanceKm * 6) * travelers);
       travelMode = "train";
       pace = "balanced";
-    } else {
+      
+      const travelCost = Math.round(distanceKm * 6 * travelers); // ₹6/km for train
+      const stayCost = 1000 * nights * travelers; // Decent accommodation
+      const foodCost = foodPerDay * days * travelers;
+      const activityCost = activityPerDay * days * travelers;
+      const buffer = Math.round((travelCost + stayCost + foodCost + activityCost) * 0.15);
+      
+      budget = travelCost + stayCost + foodCost + activityCost + buffer;
+      stayType = "homestay";
+      
+    } else if (distanceKm < 1500) {
+      // Very long trip (e.g., Mumbai to Kolkata)
       days = 5;
       nights = 4;
-      budget = Math.round(15000 + (distanceKm * 5) * travelers);
+      travelMode = "train";
+      pace = "fast";
+      
+      const travelCost = Math.round(distanceKm * 5 * travelers); // ₹5/km
+      const stayCost = 1200 * nights * travelers;
+      const foodCost = foodPerDay * days * travelers;
+      const activityCost = activityPerDay * days * travelers;
+      const buffer = Math.round((travelCost + stayCost + foodCost + activityCost) * 0.15);
+      
+      budget = travelCost + stayCost + foodCost + activityCost + buffer;
+      stayType = "homestay";
+      
+    } else {
+      // Extremely long trip (e.g., Mumbai to Northeast)
+      days = 6;
+      nights = 5;
       travelMode = "mixed";
       pace = "fast";
-    }
-
-    // Budget-based stay type
-    const budgetPerPerson = budget / travelers;
-    if (budgetPerPerson < 5000) {
-      stayType = "hostel";
-    } else if (budgetPerPerson < 15000) {
+      
+      const travelCost = Math.round(distanceKm * 4.5 * travelers); // ₹4.5/km
+      const stayCost = 1200 * nights * travelers;
+      const foodCost = foodPerDay * days * travelers;
+      const activityCost = activityPerDay * days * travelers;
+      const buffer = Math.round((travelCost + stayCost + foodCost + activityCost) * 0.2); // 20% buffer for long trips
+      
+      budget = travelCost + stayCost + foodCost + activityCost + buffer;
       stayType = "homestay";
-    } else {
-      stayType = "hotel";
     }
 
+    // Round to nearest 500
+    budget = Math.ceil(budget / 500) * 500;
+    
     // Cap budget at max
     budget = Math.min(budget, 500000);
+
+    const hours = Math.round(distanceKm / 60);
 
     const responseData = {
       days,
@@ -88,12 +141,16 @@ export const aiPrefillTrip = async (req, res) => {
       pace,
       metadata: {
         actualDistance: Math.round(distanceKm),
-        estimatedTravelTime: `${Math.round(hours)} hours`,
+        estimatedTravelTime: `${hours} hours`,
         calculatedFrom: "real coordinates"
       }
     };
 
-    console.log("AI Prefill Response:", responseData);
+    console.log("AI Prefill Response:", {
+      distance: distanceKm,
+      budget: budget,
+      travelers: travelers
+    });
 
     res.json(responseData);
   } catch (err) {
@@ -103,7 +160,7 @@ export const aiPrefillTrip = async (req, res) => {
       error: err.message,
       days: 3,
       nights: 2,
-      budget: 10000,
+      budget: 15000,
       stayType: "hostel",
       travelMode: "road",
       pace: "balanced"
@@ -161,7 +218,7 @@ Use real place names, real dishes, and real neighborhoods. Be specific and accur
           content: prompt
         }
       ],
-      temperature: 0.3, // Lower temperature for more factual responses
+      temperature: 0.3,
       max_tokens: 1000,
     });
 
@@ -175,7 +232,6 @@ Use real place names, real dishes, and real neighborhoods. Be specific and accur
       console.error("JSON Parse Error:", parseError);
       console.error("Response text:", responseText);
       
-      // Return location-aware defaults
       return res.json({
         mustVisit: [`Historic sites in ${destinationCity}`, `Local markets`, `Cultural centers`],
         localFood: ["Regional specialties", "Street food", "Traditional restaurants"],

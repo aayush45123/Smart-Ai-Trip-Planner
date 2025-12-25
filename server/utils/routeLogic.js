@@ -6,13 +6,13 @@ export function classifyRoutes(
 
   // Stay costs per night per person
   const stayCostPerNight =
-    stayType === "hotel" ? 2000 : stayType === "homestay" ? 1200 : 600;
+    stayType === "hotel" ? 2000 : stayType === "homestay" ? 1200 : 800;
 
-  // Food costs per day per person (3 meals + snacks)
-  const foodCostPerDay = 500; // Breakfast (100) + Lunch (200) + Dinner (150) + Snacks (50)
+  // Food costs per day per person (realistic Indian prices)
+  const foodCostPerDay = 500; // Breakfast (100) + Lunch (200) + Dinner (150) + Snacks/Tea (50)
 
-  // Pace affects travel time and thus costs
-  const paceMultiplier = pace === "fast" ? 1.3 : pace === "relaxed" ? 0.8 : 1;
+  // Pace affects travel costs
+  const paceMultiplier = pace === "fast" ? 1.2 : pace === "relaxed" ? 0.9 : 1;
 
   // Attraction/activity costs per day per person
   const activityCostPerDay = 400;
@@ -23,17 +23,24 @@ export function classifyRoutes(
       const distanceKm = +(r.distance / 1000).toFixed(1);
       const durationHours = +(r.duration / 3600).toFixed(1);
 
-      // ✅ REALISTIC TRAVEL COST CALCULATION
-      // Base rate: ₹8-12 per km depending on mode
+      // ✅ REALISTIC TRAVEL COST CALCULATION based on distance
       let travelCostPerKm;
+
       if (distanceKm < 200) {
-        travelCostPerKm = 10; // Short distance - road/bus
+        // Short distance - Bus/Cab
+        travelCostPerKm = 10;
       } else if (distanceKm < 500) {
-        travelCostPerKm = 7; // Medium - train/bus
+        // Medium distance - Sleeper bus/Train
+        travelCostPerKm = 7;
       } else if (distanceKm < 1000) {
-        travelCostPerKm = 5; // Long distance - train
+        // Long distance - Train (Sleeper/3AC)
+        travelCostPerKm = 5;
+      } else if (distanceKm < 1500) {
+        // Very long distance - Train (2AC)
+        travelCostPerKm = 4.5;
       } else {
-        travelCostPerKm = 4; // Very long - sleeper train/bus
+        // Extremely long distance - Train/Flight combination
+        travelCostPerKm = 4;
       }
 
       const baseTravelCost = distanceKm * travelCostPerKm * travelers;
@@ -48,9 +55,9 @@ export function classifyRoutes(
       // ✅ ACTIVITY/SIGHTSEEING COSTS
       const activityCost = days * activityCostPerDay * travelers;
 
-      // ✅ MISCELLANEOUS (10% buffer for unexpected expenses)
+      // ✅ MISCELLANEOUS (15% buffer for unexpected expenses)
       const miscCost = Math.round(
-        (travelCost + stayCost + foodCost + activityCost) * 0.1
+        (travelCost + stayCost + foodCost + activityCost) * 0.15
       );
 
       // ✅ TOTAL COST
@@ -66,6 +73,10 @@ export function classifyRoutes(
       } else {
         routeType = "Scenic Route";
       }
+
+      console.log(
+        `Route ${index}: Distance=${distanceKm}km, Total=₹${totalCost}, Budget=₹${budget}`
+      );
 
       return {
         id: index,
@@ -92,7 +103,15 @@ export function classifyRoutes(
       const withinBudget = r.totalCost <= budget;
       if (!withinBudget) {
         console.log(
-          `Route ${r.id} excluded: Cost ₹${r.totalCost} exceeds budget ₹${budget}`
+          `❌ Route ${
+            r.id
+          } excluded: Cost ₹${r.totalCost.toLocaleString()} exceeds budget ₹${budget.toLocaleString()}`
+        );
+      } else {
+        console.log(
+          `✅ Route ${
+            r.id
+          } included: Cost ₹${r.totalCost.toLocaleString()} within budget ₹${budget.toLocaleString()}`
         );
       }
       return withinBudget;

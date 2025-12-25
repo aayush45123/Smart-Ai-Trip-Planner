@@ -94,7 +94,22 @@ export default function Planner() {
 
       let fullError = errorMsg;
       if (suggestion) fullError += `\n\n${suggestion}`;
-      if (details?.distance) fullError += `\n\nDistance: ${details.distance}`;
+      if (details?.distance)
+        fullError += `\n\nActual Distance: ${details.distance}`;
+
+      // Add detailed breakdown if available
+      if (details?.breakdown) {
+        fullError += `\n\nCost Breakdown:`;
+        fullError += `\n• Travel: ${details.breakdown.travel}`;
+        fullError += `\n• Accommodation: ${details.breakdown.accommodation}`;
+        fullError += `\n• Food: ${details.breakdown.food}`;
+        fullError += `\n• Activities: ${details.breakdown.activities}`;
+        fullError += `\n• Buffer: ${details.breakdown.miscellaneous}`;
+        fullError += `\n\nYour Budget: ₹${budget.toLocaleString()}`;
+        fullError += `\nRequired: ₹${
+          details.minimumBudget?.toLocaleString() || "N/A"
+        }`;
+      }
 
       setError(fullError);
     } finally {
@@ -159,7 +174,16 @@ export default function Planner() {
 
         <div className={`${styles.card} glass-card`}>
           {error && (
-            <div className={styles.error} style={{ whiteSpace: "pre-line" }}>
+            <div
+              className={styles.error}
+              style={{
+                whiteSpace: "pre-line",
+                fontSize: "14px",
+                lineHeight: "1.6",
+                maxHeight: "300px",
+                overflowY: "auto",
+              }}
+            >
               {error}
             </div>
           )}
