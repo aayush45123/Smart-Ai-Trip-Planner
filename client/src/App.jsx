@@ -1,18 +1,22 @@
 import { Routes, Route } from "react-router-dom";
+
 import Login from "./pages/Auth/Login/Login";
 import Signup from "./pages/Auth/SignUp/SignUp";
 import Planner from "./pages/Planner/Planner";
 import TripResult from "./pages/TripResult/TripResult";
-import ProtectedRoute from "./components/ProtectedRoute";
 import Home from "./pages/Home/Home";
+
+import ProtectedRoute from "./components/ProtectedRoute";
 import Layout from "./components/Layout/Layout";
-import CustomCursor from "./components/CustomCursor/CustomCursor";
+
+
 import "./App.css";
+import CustomCursor from "./components/CustomCursor/CustomCursor";
 
 export default function App() {
   return (
     <>
-      {/* Add Custom Cursor */}
+      {/* 🔥 Global Splash Cursor */}
       <CustomCursor />
 
       <Routes>
