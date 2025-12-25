@@ -7,6 +7,7 @@ import {
 
 const router = express.Router();
 
+// Both routes require authentication
 router.post("/prefill", auth, aiPrefillTrip);
 router.post("/destination-tips", auth, aiDestinationTips);
 

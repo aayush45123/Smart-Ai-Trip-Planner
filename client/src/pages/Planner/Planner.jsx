@@ -23,6 +23,7 @@ export default function Planner() {
   const [pace, setPace] = useState("balanced");
 
   const [loading, setLoading] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
   const [error, setError] = useState("");
 
   // Prefill destination when coming from cards
@@ -35,7 +36,6 @@ export default function Planner() {
   // 📍 AUTO-DETECT USER CITY ON LOAD
   useEffect(() => {
     if (!navigator.geolocation) {
-      // Don't set default city - let it remain empty
       return;
     }
 
@@ -51,11 +51,9 @@ export default function Planner() {
           }
         } catch (err) {
           console.error("Error getting city:", err);
-          // Don't set default - let user enter manually
         }
       },
       (error) => {
-        // Permission denied or error - don't set default
         console.log("Geolocation permission denied or error:", error);
       }
     );
@@ -97,6 +95,14 @@ export default function Planner() {
   }
 
   async function aiAutoFill() {
+    if (!startCity.trim() || !destinationCity.trim()) {
+      alert("Please enter both starting and destination cities first");
+      return;
+    }
+
+    setAiLoading(true);
+    setError("");
+
     try {
       const res = await api.post("/ai/prefill", {
         startCity,
@@ -104,14 +110,21 @@ export default function Planner() {
         travelers,
       });
 
-      setDays(res.data.days);
-      setNights(res.data.nights);
-      setBudget(res.data.budget);
-      setStayType(res.data.stayType);
-      setTravelMode(res.data.travelMode);
-      setPace(res.data.pace);
-    } catch {
-      alert("AI failed to suggest trip");
+      // Update all fields with AI suggestions
+      if (res.data.days) setDays(res.data.days);
+      if (res.data.nights) setNights(res.data.nights);
+      if (res.data.budget) setBudget(res.data.budget);
+      if (res.data.stayType) setStayType(res.data.stayType);
+      if (res.data.travelMode) setTravelMode(res.data.travelMode);
+      if (res.data.pace) setPace(res.data.pace);
+
+      // Show success message
+      alert("✅ AI has auto-filled the trip details!");
+    } catch (err) {
+      console.error("AI Auto-fill Error:", err);
+      setError("AI auto-fill failed. You can still plan your trip manually.");
+    } finally {
+      setAiLoading(false);
     }
   }
 
@@ -236,8 +249,12 @@ export default function Planner() {
               </select>
             </div>
 
-            <button className={styles.aiBtn} onClick={aiAutoFill}>
-              🤖 AI AUTO-FILL TRIP
+            <button
+              className={styles.aiBtn}
+              onClick={aiAutoFill}
+              disabled={aiLoading || !startCity || !destinationCity}
+            >
+              {aiLoading ? "⏳ AI Working..." : "🤖 AI AUTO-FILL TRIP"}
             </button>
 
             <button
