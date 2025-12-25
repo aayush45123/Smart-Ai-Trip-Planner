@@ -6,46 +6,88 @@
   font-family: var(--font-family);
   padding: 8rem 2rem 2rem;
   display: grid;
-  grid-template-columns: 380px 1fr;
+  grid-template-columns: 340px 380px 1fr;
   gap: 2rem;
-  max-width: 1800px;
+  max-width: 1920px;
   margin: 0 auto;
+  position: relative;
 }
 
-/* ===== SIDEBAR ===== */
+.container::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+      90deg,
+      var(--color-border-strong) 1px,
+      transparent 1px
+    ),
+    linear-gradient(0deg, var(--color-border-strong) 1px, transparent 1px);
+  background-size: 40px 40px;
+  opacity: 0.03;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ===== NEARBY PLACES SIDEBAR ===== */
 .sidebar {
   background: var(--color-bg-secondary);
-  border: 3px solid var(--color-primary);
-  padding: 2.5rem;
+  border: 4px solid var(--color-primary);
+  padding: 2rem;
   height: fit-content;
   position: sticky;
   top: 8rem;
-  clip-path: polygon(0 0, calc(100% - 30px) 0, 100% 30px, 100% 100%, 0 100%);
+  clip-path: polygon(0 0, calc(100% - 35px) 0, 100% 35px, 100% 100%, 0 100%);
   overflow-y: auto;
   max-height: calc(100vh - 10rem);
+  box-shadow: 8px 8px 0 rgba(6, 182, 212, 0.2);
+  transition: box-shadow 0.3s;
+}
+
+.sidebar:hover {
+  box-shadow: 12px 12px 0 rgba(6, 182, 212, 0.3);
 }
 
 .sidebar::before {
   content: "";
   position: absolute;
-  top: 0;
-  right: 0;
-  width: 50px;
-  height: 50px;
-  border-right: 3px solid var(--color-primary);
-  border-top: 3px solid var(--color-primary);
-  pointer-events: none;
+  top: -4px;
+  right: -4px;
+  width: 55px;
+  height: 55px;
+  border-right: 4px solid var(--color-primary);
+  border-top: 4px solid var(--color-primary);
+  clip-path: polygon(100% 0, 100% 100%, 0 100%);
+  background: var(--color-bg-primary);
+}
+
+.sidebar::after {
+  content: "NEARBY";
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 0.5rem;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+  color: var(--color-primary);
+  opacity: 0.4;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
 }
 
 .sidebar h3 {
-  font-size: 1.75rem;
+  font-size: 1.875rem;
   font-weight: 900;
   text-transform: uppercase;
-  letter-spacing: -0.01em;
-  margin: 0 0 2rem 0;
+  letter-spacing: -0.02em;
+  margin: 0 0 2.5rem 0;
   color: var(--color-primary);
   position: relative;
-  padding-bottom: 1rem;
+  padding-bottom: 1.25rem;
+  line-height: 1;
 }
 
 .sidebar h3::after {
@@ -53,9 +95,177 @@
   position: absolute;
   bottom: 0;
   left: 0;
-  width: 60px;
-  height: 3px;
+  width: 80px;
+  height: 4px;
   background: var(--color-primary);
+  clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 0 100%);
+}
+
+/* ===== AI RECOMMENDATIONS SIDEBAR ===== */
+.aiSidebar {
+  background: var(--color-bg-secondary);
+  border: 4px solid var(--color-primary);
+  padding: 2rem;
+  height: fit-content;
+  position: sticky;
+  top: 8rem;
+  clip-path: polygon(35px 0, 100% 0, 100% 100%, 0 100%, 0 35px);
+  overflow-y: auto;
+  max-height: calc(100vh - 10rem);
+  box-shadow: -8px 8px 0 rgba(6, 182, 212, 0.2);
+  transition: box-shadow 0.3s;
+}
+
+.aiSidebar:hover {
+  box-shadow: -12px 12px 0 rgba(6, 182, 212, 0.3);
+}
+
+.aiSidebar::before {
+  content: "";
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  width: 55px;
+  height: 55px;
+  border-left: 4px solid var(--color-primary);
+  border-top: 4px solid var(--color-primary);
+  clip-path: polygon(0 0, 100% 100%, 0 100%);
+  background: var(--color-bg-primary);
+}
+
+.aiSidebar::after {
+  content: "AI TIPS";
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  font-size: 0.5rem;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+  color: var(--color-primary);
+  opacity: 0.4;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+}
+
+.aiSidebar h3 {
+  font-size: 1.5rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 2rem 0;
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding-bottom: 1rem;
+  border-bottom: 3px solid var(--color-primary);
+}
+
+.aiSidebar h4 {
+  font-size: 0.875rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--color-text-primary);
+  margin: 2rem 0 0.75rem 0;
+  padding: 0.6rem 1rem;
+  background: var(--color-bg-primary);
+  border-left: 4px solid var(--color-primary);
+  clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 0 100%);
+  position: relative;
+}
+
+.aiSidebar h4:first-of-type {
+  margin-top: 0;
+}
+
+.aiSidebar h4::before {
+  content: "▸";
+  position: absolute;
+  left: -0.5rem;
+  color: var(--color-primary);
+  font-size: 1.2rem;
+}
+
+.aiSidebar ul {
+  list-style: none;
+  padding: 0;
+  margin: 0.75rem 0 0 0;
+}
+
+.aiSidebar ul li {
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.5rem;
+  background: var(--color-bg-primary);
+  border: 2px solid var(--color-border-strong);
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.5;
+  transition: all 0.2s;
+  clip-path: polygon(
+    4px 0,
+    100% 0,
+    100% calc(100% - 4px),
+    calc(100% - 4px) 100%,
+    0 100%,
+    0 4px
+  );
+  position: relative;
+  padding-left: 2rem;
+}
+
+.aiSidebar ul li::before {
+  content: "→";
+  position: absolute;
+  left: 0.75rem;
+  color: var(--color-primary);
+  font-weight: 900;
+  font-size: 0.875rem;
+}
+
+.aiSidebar ul li:hover {
+  border-color: var(--color-primary);
+  transform: translateX(3px);
+  background: rgba(6, 182, 212, 0.05);
+}
+
+.aiSidebar p {
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.6;
+  padding: 1rem;
+  margin: 0.75rem 0 0 0;
+  background: var(--color-bg-primary);
+  border: 2px solid var(--color-primary);
+  clip-path: polygon(
+    6px 0,
+    100% 0,
+    100% calc(100% - 6px),
+    calc(100% - 6px) 100%,
+    0 100%,
+    0 6px
+  );
+}
+
+.aiLoading {
+  padding: 2rem;
+  text-align: center;
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-primary);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
 /* ===== PLACE GROUP ===== */
@@ -68,16 +278,41 @@
 }
 
 .placeGroup h4 {
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: 0.1em;
   color: var(--color-text-primary);
   margin: 0 0 1rem 0;
-  padding: 0.75rem 1rem;
+  padding: 0.875rem 1rem;
   background: var(--color-bg-primary);
-  border-left: 3px solid var(--color-primary);
+  border-left: 4px solid var(--color-primary);
   clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%);
+  position: relative;
+  box-shadow: 3px 3px 0 rgba(6, 182, 212, 0.15);
+}
+
+.placeGroup h4::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 10px;
+  height: 10px;
+  background: var(--color-primary);
+  clip-path: polygon(100% 0, 100% 100%, 0 100%);
+}
+
+.noPlaces {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-secondary);
+  padding: 1rem;
+  text-align: center;
+  border: 2px dashed var(--color-border-strong);
+  background: rgba(0, 0, 0, 0.2);
 }
 
 /* ===== PLACE ITEM ===== */
@@ -85,25 +320,58 @@
   display: grid;
   grid-template-columns: 1fr auto auto;
   align-items: center;
-  gap: 1rem;
-  padding: 1rem;
+  gap: 0.75rem;
+  padding: 1rem 0.875rem;
   background: var(--color-bg-primary);
-  border: 2px solid var(--color-border-strong);
-  margin-bottom: 0.75rem;
-  transition: all 0.3s;
+  border: 3px solid var(--color-border-strong);
+  margin-bottom: 0.875rem;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   clip-path: polygon(
-    6px 0,
+    8px 0,
     100% 0,
-    100% calc(100% - 6px),
-    calc(100% - 6px) 100%,
+    100% calc(100% - 8px),
+    calc(100% - 8px) 100%,
     0 100%,
-    0 6px
+    0 8px
   );
+  position: relative;
+}
+
+.placeItem::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 10px;
+  height: 10px;
+  background: var(--color-primary);
+  clip-path: polygon(0 0, 100% 0, 0 100%);
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+
+.placeItem::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 10px;
+  height: 10px;
+  background: var(--color-primary);
+  clip-path: polygon(100% 0, 100% 100%, 0 100%);
+  opacity: 0;
+  transition: opacity 0.25s;
 }
 
 .placeItem:hover {
   border-color: var(--color-primary);
-  transform: translateX(5px);
+  transform: translateX(6px);
+  box-shadow: -4px 4px 0 rgba(6, 182, 212, 0.2);
+}
+
+.placeItem:hover::before,
+.placeItem:hover::after {
+  opacity: 1;
 }
 
 .placeItem:last-child {
@@ -111,7 +379,7 @@
 }
 
 .placeItem > span:first-child {
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.03em;
@@ -123,142 +391,231 @@
 
 /* ===== DISTANCE ===== */
 .distance {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 900;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
   color: var(--color-primary);
   text-transform: uppercase;
-  padding: 0.4rem 0.75rem;
+  padding: 0.45rem 0.875rem;
   background: rgba(6, 182, 212, 0.1);
-  border: 1px solid var(--color-primary);
+  border: 2px solid var(--color-primary);
   white-space: nowrap;
+  clip-path: polygon(
+    4px 0,
+    100% 0,
+    100% calc(100% - 4px),
+    calc(100% - 4px) 100%,
+    0 100%,
+    0 4px
+  );
+  box-shadow: 2px 2px 0 rgba(6, 182, 212, 0.15);
 }
 
 /* ===== LOCATE BUTTON ===== */
 .locateBtn {
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   background: var(--color-primary);
   border: none;
   color: var(--color-bg-primary);
   font-size: 1.125rem;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   clip-path: polygon(
-    20% 0%,
-    80% 0%,
-    100% 20%,
-    100% 80%,
-    80% 100%,
-    20% 100%,
-    0% 80%,
-    0% 20%
+    25% 0%,
+    75% 0%,
+    100% 25%,
+    100% 75%,
+    75% 100%,
+    25% 100%,
+    0% 75%,
+    0% 25%
   );
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.3);
+}
+
+.locateBtn::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border: 2px solid var(--color-primary);
+  clip-path: polygon(
+    25% 0%,
+    75% 0%,
+    100% 25%,
+    100% 75%,
+    75% 100%,
+    25% 100%,
+    0% 75%,
+    0% 25%
+  );
+  opacity: 0;
+  transition: opacity 0.3s;
 }
 
 .locateBtn:hover {
-  transform: scale(1.1) rotate(15deg);
-  box-shadow: 0 0 15px rgba(6, 182, 212, 0.5);
+  transform: scale(1.15) rotate(15deg);
+  box-shadow: 0 0 20px rgba(6, 182, 212, 0.6), 4px 4px 0 rgba(0, 0, 0, 0.4);
+}
+
+.locateBtn:hover::before {
+  opacity: 1;
 }
 
 .locateBtn:active {
-  transform: scale(0.95);
+  transform: scale(0.95) rotate(0deg);
+  box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.3);
 }
 
 /* ===== MAIN MAP AREA ===== */
 .main {
   background: var(--color-bg-secondary);
-  border: 3px solid var(--color-primary);
-  padding: 2rem;
+  border: 4px solid var(--color-primary);
+  padding: 2.5rem;
   clip-path: polygon(
-    30px 0,
+    35px 0,
     100% 0,
-    100% calc(100% - 30px),
-    calc(100% - 30px) 100%,
+    100% calc(100% - 35px),
+    calc(100% - 35px) 100%,
     0 100%,
-    0 30px
+    0 35px
   );
   position: relative;
-  min-height: 600px;
+  min-height: 700px;
   display: flex;
   flex-direction: column;
+  box-shadow: 0 12px 0 rgba(6, 182, 212, 0.2);
 }
 
 .main::before {
   content: "";
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 50px;
-  height: 50px;
-  border-left: 3px solid var(--color-primary);
-  border-top: 3px solid var(--color-primary);
-  pointer-events: none;
+  top: -4px;
+  left: -4px;
+  width: 55px;
+  height: 55px;
+  border-left: 4px solid var(--color-primary);
+  border-top: 4px solid var(--color-primary);
+  clip-path: polygon(0 0, 100% 100%, 0 100%);
+  background: var(--color-bg-primary);
 }
 
 .main::after {
   content: "";
   position: absolute;
-  bottom: 0;
-  right: 0;
-  width: 50px;
-  height: 50px;
-  border-right: 3px solid var(--color-primary);
-  border-bottom: 3px solid var(--color-primary);
-  pointer-events: none;
+  bottom: -4px;
+  right: -4px;
+  width: 55px;
+  height: 55px;
+  border-right: 4px solid var(--color-primary);
+  border-bottom: 4px solid var(--color-primary);
+  clip-path: polygon(100% 0, 100% 100%, 0 0);
+  background: var(--color-bg-primary);
 }
 
 /* ===== MAP HEADER ===== */
 .mapHeader {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.75rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 3px solid var(--color-border-strong);
+  position: relative;
+}
+
+.mapHeader::after {
+  content: "";
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+  width: 120px;
+  height: 3px;
+  background: var(--color-primary);
 }
 
 .mapHeader h2 {
-  font-size: 1.5rem;
+  font-size: 1.75rem;
   font-weight: 900;
   text-transform: uppercase;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
   color: var(--color-primary);
-  margin: 0 0 0.5rem 0;
+  margin: 0 0 0.75rem 0;
+  line-height: 1.1;
+  text-shadow: 3px 3px 0 rgba(6, 182, 212, 0.2);
 }
 
 .mapHeader p {
   font-size: 0.875rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
   color: var(--color-text-secondary);
   margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.mapHeader p::before {
+  content: "▸";
+  color: var(--color-primary);
+  font-size: 1rem;
 }
 
 /* ===== MAP WRAPPER ===== */
 .mapWrapper {
   flex: 1;
-  border: 2px solid var(--color-border-strong);
+  border: 3px solid var(--color-border-strong);
   overflow: hidden;
   clip-path: polygon(
-    10px 0,
+    12px 0,
     100% 0,
-    100% calc(100% - 10px),
-    calc(100% - 10px) 100%,
+    100% calc(100% - 12px),
+    calc(100% - 12px) 100%,
     0 100%,
-    0 10px
+    0 12px
   );
+  box-shadow: inset 0 0 0 2px var(--color-bg-primary);
+  position: relative;
 }
 
-/* Override Leaflet styles */
+.mapWrapper::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 14px;
+  height: 14px;
+  background: var(--color-primary);
+  clip-path: polygon(0 0, 100% 0, 0 100%);
+  z-index: 1000;
+}
+
+.mapWrapper::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 14px;
+  height: 14px;
+  background: var(--color-primary);
+  clip-path: polygon(100% 0, 100% 100%, 0 100%);
+  z-index: 1000;
+}
+
 .mapWrapper :global(.leaflet-container) {
   height: 100% !important;
-  min-height: 500px;
-  background: #1a1a1a;
+  min-height: 550px;
+  background: #0a0a0a;
+  font-family: var(--font-family);
 }
 
 .mapWrapper :global(.leaflet-popup-content-wrapper) {
   background: var(--color-bg-secondary);
-  border: 2px solid var(--color-primary);
+  border: 3px solid var(--color-primary);
   color: var(--color-text-primary);
   font-family: var(--font-family);
   font-weight: 700;
@@ -272,11 +629,12 @@
     0 100%,
     0 8px
   );
+  box-shadow: 4px 4px 0 rgba(6, 182, 212, 0.3);
 }
 
 .mapWrapper :global(.leaflet-popup-tip) {
   background: var(--color-bg-secondary);
-  border: 2px solid var(--color-primary);
+  border: 3px solid var(--color-primary);
 }
 
 /* ===== LOADING STATE ===== */
@@ -287,27 +645,37 @@
   justify-content: center;
   background: var(--color-bg-primary);
   color: var(--color-primary);
-  font-size: 2rem;
+  font-size: 2.5rem;
   font-weight: 900;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.15em;
+  text-shadow: 4px 4px 0 rgba(6, 182, 212, 0.2);
+  animation: pulse 2s infinite;
 }
 
 /* ===== RESPONSIVE ===== */
+@media (max-width: 1400px) {
+  .container {
+    grid-template-columns: 320px 360px 1fr;
+    gap: 1.5rem;
+  }
+}
+
 @media (max-width: 1200px) {
   .container {
     grid-template-columns: 1fr;
     padding: 7rem 1.5rem 2rem;
   }
 
-  .sidebar {
+  .sidebar,
+  .aiSidebar {
     position: relative;
     top: 0;
     max-height: none;
   }
 
   .main {
-    min-height: 500px;
+    min-height: 600px;
   }
 }
 
@@ -317,19 +685,32 @@
     gap: 1.5rem;
   }
 
-  .sidebar {
+  .sidebar,
+  .aiSidebar {
     padding: 1.5rem;
-    clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 0 100%);
   }
 
-  .sidebar::before {
-    width: 35px;
-    height: 35px;
+  .sidebar {
+    clip-path: polygon(0 0, calc(100% - 25px) 0, 100% 25px, 100% 100%, 0 100%);
+  }
+
+  .aiSidebar {
+    clip-path: polygon(25px 0, 100% 0, 100% 100%, 0 100%, 0 25px);
+  }
+
+  .sidebar::before,
+  .aiSidebar::before {
+    width: 40px;
+    height: 40px;
   }
 
   .sidebar h3 {
     font-size: 1.5rem;
-    margin-bottom: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .aiSidebar h3 {
+    font-size: 1.25rem;
   }
 
   .placeGroup {
@@ -339,41 +720,56 @@
   .placeItem {
     grid-template-columns: 1fr auto;
     gap: 0.75rem;
+    padding: 1rem;
   }
 
   .locateBtn {
     grid-column: 1 / -1;
     width: 100%;
-    height: 40px;
+    height: 44px;
     margin-top: 0.5rem;
+    clip-path: polygon(
+      6px 0,
+      100% 0,
+      100% calc(100% - 6px),
+      calc(100% - 6px) 100%,
+      0 100%,
+      0 6px
+    );
+  }
+
+  .distance {
+    grid-row: 2;
+    grid-column: 1;
   }
 
   .main {
-    padding: 1.5rem;
-    min-height: 400px;
+    padding: 1.75rem;
+    min-height: 500px;
     clip-path: polygon(
-      20px 0,
+      25px 0,
       100% 0,
-      100% calc(100% - 20px),
-      calc(100% - 20px) 100%,
+      100% calc(100% - 25px),
+      calc(100% - 25px) 100%,
       0 100%,
-      0 20px
+      0 25px
     );
   }
 
   .main::before,
   .main::after {
-    width: 35px;
-    height: 35px;
+    width: 40px;
+    height: 40px;
   }
 
   .mapWrapper :global(.leaflet-container) {
-    min-height: 350px;
+    min-height: 400px;
   }
 }
 
 @media (max-width: 480px) {
-  .sidebar {
+  .sidebar,
+  .aiSidebar {
     padding: 1.25rem;
   }
 
@@ -381,9 +777,18 @@
     font-size: 1.25rem;
   }
 
+  .aiSidebar h3 {
+    font-size: 1.125rem;
+  }
+
   .placeGroup h4 {
-    font-size: 0.875rem;
-    padding: 0.6rem 0.75rem;
+    font-size: 0.8rem;
+    padding: 0.65rem 0.875rem;
+  }
+
+  .aiSidebar h4 {
+    font-size: 0.75rem;
+    padding: 0.5rem 0.875rem;
   }
 
   .placeItem > span:first-child {
@@ -391,8 +796,8 @@
   }
 
   .distance {
-    font-size: 0.7rem;
-    padding: 0.35rem 0.6rem;
+    font-size: 0.65rem;
+    padding: 0.4rem 0.65rem;
   }
 
   .main {
@@ -401,5 +806,9 @@
 
   .mapHeader h2 {
     font-size: 1.25rem;
+  }
+
+  .mapHeader p {
+    font-size: 0.75rem;
   }
 }
