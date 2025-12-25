@@ -1,0 +1,201 @@
+/* ================================
+   GLOBAL CURSOR CONTROL
+================================ */
+
+/* Hide default cursor (desktop only) */
+:global(*) {
+  cursor: none !important;
+}
+
+/* ================================
+   MAIN CURSOR
+================================ */
+
+.customCursor {
+  position: fixed;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  transition: transform 0.18s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    opacity 0.2s ease;
+  will-change: transform, opacity;
+}
+
+.hidden {
+  opacity: 0;
+}
+
+.pointer {
+  transform: translate(-50%, -50%) scale(1.6);
+}
+
+/* ================================
+   INNER DOT
+================================ */
+
+.cursorInner {
+  width: 10px;
+  height: 10px;
+  background: var(--color-primary);
+  border-radius: 50%;
+  position: relative;
+  box-shadow: 0 0 12px var(--color-primary), 0 0 24px var(--color-primary),
+    0 0 40px rgba(0, 212, 255, 0.6);
+  animation: pulseInner 2s ease-in-out infinite;
+}
+
+@keyframes pulseInner {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.25);
+    opacity: 0.85;
+  }
+}
+
+/* ================================
+   GLOW EFFECT
+================================ */
+
+.cursorGlow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 45px;
+  height: 45px;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(
+    circle,
+    rgba(0, 212, 255, 0.45) 0%,
+    rgba(0, 212, 255, 0.25) 35%,
+    rgba(0, 212, 255, 0.1) 55%,
+    transparent 70%
+  );
+  border-radius: 50%;
+  animation: glowPulse 2.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes glowPulse {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.7);
+    opacity: 0.25;
+  }
+}
+
+/* ================================
+   OUTER RING
+================================ */
+
+.customCursorRing {
+  position: fixed;
+  pointer-events: none;
+  z-index: 9998;
+  width: 50px;
+  height: 50px;
+  border: 2px solid var(--color-primary);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0.65;
+  transition: width 0.25s ease, height 0.25s ease, opacity 0.25s ease,
+    border-color 0.25s ease;
+  box-shadow: 0 0 18px rgba(0, 212, 255, 0.45),
+    inset 0 0 18px rgba(0, 212, 255, 0.25);
+  animation: rotateRing 10s linear infinite;
+  will-change: transform;
+}
+
+@keyframes rotateRing {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+.customCursorRing.pointer {
+  width: 75px;
+  height: 75px;
+  opacity: 0.85;
+  border-color: rgba(0, 255, 255, 0.9);
+  box-shadow: 0 0 35px rgba(0, 255, 255, 0.75),
+    inset 0 0 30px rgba(0, 255, 255, 0.4);
+}
+
+.customCursorRing.hidden {
+  opacity: 0;
+}
+
+/* ================================
+   TRAIL EFFECT
+================================ */
+
+.cursorTrail {
+  position: fixed;
+  pointer-events: none;
+  z-index: 9997;
+  width: 10px;
+  height: 10px;
+  background: var(--color-primary);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 12px var(--color-primary), 0 0 20px rgba(0, 212, 255, 0.6);
+  animation: fadeTrail 0.6s ease-out forwards;
+}
+
+@keyframes fadeTrail {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.4);
+  }
+}
+
+/* ================================
+   HOVER / INTERACTIVE STATES
+================================ */
+
+.pointer .cursorInner {
+  background: #00ffff;
+  box-shadow: 0 0 18px #00ffff, 0 0 35px #00ffff,
+    0 0 60px rgba(0, 255, 255, 0.6);
+  animation: pulseHover 1s ease-in-out infinite;
+}
+
+@keyframes pulseHover {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.6);
+  }
+}
+
+/* ================================
+   MOBILE / TOUCH DEVICES
+================================ */
+
+@media (max-width: 768px) {
+  :global(*) {
+    cursor: auto !important;
+  }
+
+  .customCursor,
+  .customCursorRing,
+  .cursorTrail {
+    display: none !important;
+  }
+}
