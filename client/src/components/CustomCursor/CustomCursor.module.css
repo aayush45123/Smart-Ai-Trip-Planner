@@ -12,11 +12,12 @@
 
 .brutalistCursor {
   position: fixed;
-  pointer-events: none;
-  z-index: 9999;
+  pointer-events: none !important;
+  z-index: 999999;
   transform: translate(-50%, -50%);
   transition: transform 0.1s cubic-bezier(0.23, 1, 0.32, 1);
   will-change: transform;
+  user-select: none;
 }
 
 .brutalistCursor.hidden {
@@ -42,6 +43,7 @@
     0 0 60px rgba(0, 212, 255, 0.5), inset 0 0 10px rgba(255, 255, 255, 0.8);
   animation: pulseCoreBrutalist 2.5s ease-in-out infinite;
   filter: brightness(1.2);
+  pointer-events: none !important;
 }
 
 @keyframes pulseCoreBrutalist {
@@ -89,6 +91,7 @@
   );
   animation: glowPulseBrutalist 2s ease-in-out infinite;
   filter: blur(8px);
+  pointer-events: none !important;
 }
 
 @keyframes glowPulseBrutalist {
@@ -109,8 +112,8 @@
 
 .brutalistRing {
   position: fixed;
-  pointer-events: none;
-  z-index: 9998;
+  pointer-events: none !important;
+  z-index: 999998;
   width: 50px;
   height: 50px;
   border: 2px solid var(--color-primary);
@@ -125,6 +128,7 @@
   will-change: transform;
   background: rgba(0, 212, 255, 0.03);
   backdrop-filter: blur(2px);
+  user-select: none;
 }
 
 @keyframes rotateBrutalistRing {
@@ -169,6 +173,7 @@
   clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
   box-shadow: 0 0 10px var(--color-primary);
   animation: cornerPulse 2s ease-in-out infinite;
+  pointer-events: none !important;
 }
 
 @keyframes cornerPulse {
@@ -205,8 +210,8 @@
 
 .scanLine {
   position: fixed;
-  pointer-events: none;
-  z-index: 9997;
+  pointer-events: none !important;
+  z-index: 999997;
   width: 60px;
   height: 2px;
   background: linear-gradient(
@@ -219,6 +224,7 @@
   opacity: 0.8;
   box-shadow: 0 0 15px var(--color-primary);
   animation: scanAnimation 2s ease-in-out infinite;
+  user-select: none;
 }
 
 @keyframes scanAnimation {
@@ -243,8 +249,8 @@
 
 .cursorTrail {
   position: fixed;
-  pointer-events: none;
-  z-index: 9996;
+  pointer-events: none !important;
+  z-index: 999996;
   width: 6px;
   height: 6px;
   background: var(--color-primary);
@@ -252,6 +258,7 @@
   transform: translate(-50%, -50%);
   box-shadow: 0 0 15px var(--color-primary), 0 0 25px rgba(0, 212, 255, 0.5);
   animation: fadeTrailBrutalist 0.6s ease-out forwards;
+  user-select: none;
 }
 
 @keyframes fadeTrailBrutalist {
@@ -271,8 +278,8 @@
 
 .clickRipple {
   position: fixed;
-  pointer-events: none;
-  z-index: 9995;
+  pointer-events: none !important;
+  z-index: 999995;
   width: 20px;
   height: 20px;
   border: 3px solid var(--color-primary);
@@ -281,6 +288,7 @@
   box-shadow: 0 0 20px var(--color-primary),
     inset 0 0 20px rgba(0, 212, 255, 0.3);
   animation: rippleExpand 0.8s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+  user-select: none;
 }
 
 @keyframes rippleExpand {
@@ -318,12 +326,17 @@
 }
 
 /* ================================
-   HOVER STATES FOR INTERACTIVE ELEMENTS
+   ENSURE CLICKABILITY
 ================================ */
 
-:global(button:hover),
-:global(a:hover),
-:global(input:hover),
-:global([role="button"]:hover) {
-  /* Elements will trigger the pointer state automatically */
+:global(button),
+:global(a),
+:global(input),
+:global(select),
+:global(textarea),
+:global([role="button"]),
+:global([onclick]) {
+  pointer-events: auto !important;
+  position: relative;
+  z-index: auto;
 }
